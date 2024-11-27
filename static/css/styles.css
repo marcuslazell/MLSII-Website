@@ -1,0 +1,413 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    color: #666;
+    background-color: white;
+    letter-spacing: 1px;
+    min-height: 100vh;
+}
+
+/* Home Page Styles */
+.home-container {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 4rem;
+}
+
+.main-title {
+    font-size: 2.5rem;
+    font-weight: normal;
+    color: #666;
+    letter-spacing: 2px;
+}
+
+.home-links {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+.home-links a {
+    text-decoration: none;
+    color: #666;
+    font-size: 1rem;
+    letter-spacing: 2px;
+    transition: color 0.3s ease;
+}
+
+.home-links a:hover {
+    color: #333;
+}
+
+/* Navigation for other pages */
+nav {
+    position: fixed;
+    right: 0;
+    top: 0;
+    width: 320px;
+    height: 100vh;
+    padding: 2rem;
+    background-color: white;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    /* Changed from align-items: flex-start */
+    justify-content: center;
+    /* Added to center vertically */
+}
+
+.logo {
+    font-size: 2.5rem;
+    /* Made larger to match homepage */
+    margin-bottom: 4rem;
+    /* Increased spacing to match homepage */
+    color: #666;
+    letter-spacing: 2px;
+    text-decoration: none;
+    text-align: center;
+    /* Added to ensure text is centered */
+}
+
+.nav-links {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    /* Changed to center links */
+    gap: 1.5rem;
+    width: 100%;
+    text-align: center;
+    /* Added to ensure text is centered */
+}
+
+.nav-links a {
+    text-decoration: none;
+    color: #666;
+    font-size: 1rem;
+    letter-spacing: 2px;
+    transition: color 0.3s ease;
+    text-align: center;
+    /* Added to ensure text is centered */
+}
+
+.nav-links a:hover {
+    color: #333;
+}
+
+/* Main Content Area */
+main {
+    min-height: 100vh;
+}
+
+/* Photography Page Styles */
+.photography-container {
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    height: 100vh;
+    margin-right: 320px;
+}
+
+/* Sidebar Styles */
+.sidebar {
+    padding: 2rem;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    border-right: 1px solid #eee;
+    display: flex;
+    /* Added */
+    flex-direction: column;
+    /* Added */
+    justify-content: center;
+    /* Added */
+    align-items: center;
+    /* Added */
+    text-align: center;
+    /* Added */
+}
+
+.profile-image {
+    margin-bottom: 2rem;
+    width: 100%;
+    /* Added to control image width */
+    max-width: 280px;
+    /* Added to control image width */
+}
+
+.profile-pic {
+    width: 100%;
+    height: auto;
+    border: 1px solid #eee;
+}
+
+.bio {
+    color: #666;
+    line-height: 1.6;
+    max-width: 280px;
+    /* Added to match profile image width */
+}
+
+.bio p {
+    margin-bottom: 1rem;
+    text-align: center;
+    /* Added */
+}
+
+/* Portfolio Video Styles */
+.portfolio-item video {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Show video controls on hover */
+.portfolio-item video:hover {
+    object-fit: contain;
+    background: black;
+}
+
+/* Update logo styles */
+.logo {
+    font-size: 1.2rem;
+    margin-bottom: 3rem;
+    color: #666;
+    letter-spacing: 2px;
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.logo:hover {
+    color: #333;
+}
+
+/* Portfolio Styles with Auto-hiding Scrollbar */
+.portfolio-wrapper {
+    height: 100vh;
+    overflow-y: auto;
+    padding: 2rem;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* Hide scrollbar by default */
+.portfolio-wrapper {
+    scrollbar-width: none;
+    /* Firefox */
+    -ms-overflow-style: none;
+    /* IE/Edge */
+}
+
+.portfolio-wrapper::-webkit-scrollbar {
+    display: none;
+    /* Chrome/Safari/Opera */
+}
+
+/* Show scrollbar only when hovering over the wrapper */
+.portfolio-wrapper:hover {
+    scrollbar-width: thin;
+    /* Firefox */
+    -ms-overflow-style: auto;
+    /* IE/Edge */
+}
+
+.portfolio-wrapper:hover::-webkit-scrollbar {
+    display: block;
+    width: 8px;
+}
+
+.portfolio-wrapper:hover::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.portfolio-wrapper:hover::-webkit-scrollbar-thumb {
+    background-color: rgba(0, 0, 0, 0.2);
+    border-radius: 4px;
+}
+
+.portfolio-wrapper:hover::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(0, 0, 0, 0.3);
+}
+
+.portfolio-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 2rem;
+    padding-right: 1rem;
+}
+
+.portfolio-item {
+    position: relative;
+    width: 100%;
+    padding-bottom: 125%;
+    overflow: hidden;
+    border: 1px solid #eee;
+}
+
+.portfolio-item img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.portfolio-item:hover img {
+    transform: scale(1.05);
+}
+
+/* Links Page Styles */
+.links-container {
+    padding: 4rem;
+    max-width: 1200px;
+    margin: 0 auto;
+    margin-right: 320px;
+    /* Space for navigation */
+    text-align: center;
+}
+
+.links-title {
+    font-size: 2.5rem;
+    font-weight: normal;
+    color: #666;
+    letter-spacing: 2px;
+    margin-bottom: 4rem;
+}
+
+.links-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 2rem;
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.link-button {
+    text-decoration: none;
+    position: relative;
+    border-radius: 20px;
+    overflow: hidden;
+    aspect-ratio: 16/9;
+    transition: transform 0.3s ease;
+}
+
+.link-button:hover {
+    transform: translateY(-5px);
+}
+
+.link-image {
+    width: 100%;
+    height: 100%;
+    background-size: cover;
+    background-position: center;
+    position: relative;
+}
+
+.link-text {
+    position: absolute;
+    bottom: 20px;
+    left: 20px;
+    color: white;
+    font-size: 1.2rem;
+    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
+}
+
+/* Make sure images directory exists and add preview images */
+
+/* Make sure images directory exists and add preview images */
+
+/* Tesla Project Page Styles */
+.tesla-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    margin-right: 320px;
+    /* Space for navigation */
+}
+
+.tesla-content {
+    text-align: center;
+}
+
+.tesla-content h1 {
+    font-size: 2.5rem;
+    font-weight: normal;
+    color: #666;
+    letter-spacing: 2px;
+    margin-bottom: 1rem;
+}
+
+.tesla-content p {
+    font-size: 1rem;
+    color: #666;
+    letter-spacing: 2px;
+}
+
+/* Social Media Icons */
+.social-links {
+    display: flex;
+    gap: 2rem;
+    margin-top: 2rem;
+}
+
+.social-links a {
+    color: #666;
+    font-size: 1.5rem;
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.social-links a:hover {
+    color: #333;
+}
+
+.social-links .fa-youtube:hover {
+    color: #FF0000;
+}
+
+.social-links .fa-instagram:hover {
+    color: #E4405F;
+}
+
+/* Utility Classes */
+.text-center {
+    text-align: center;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 4rem;
+    margin-right: 320px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    nav {
+        width: 100%;
+        height: auto;
+        position: relative;
+    }
+
+    .container,
+    .photography-container,
+    .tesla-container {
+        margin-right: 0;
+    }
+
+    .links-grid {
+        grid-template-columns: 1fr;
+    }
+}

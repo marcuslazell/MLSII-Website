@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="links-container">
+    <h1 class="links-title">LINK IN BIO</h1>
+    <div class="links-grid">
+        <a href="https://www.tesla.com/referral/marcus222004" class="link-button" target="_blank">
+            <div class="link-image"
+                style="background-image: url('{{ url_for('static', filename='images/tesla-preview.jpg') }}');">
+                <span class="link-text">Tesla Referral</span>
+            </div>
+        </a>
+
+        <a href="https://www.equinox.com/referrals/0033x000039sYGLAA2" class="link-button" target="_blank">
+            <div class="link-image"
+                style="background-image: url('{{ url_for('static', filename='images/equinox-preview.jpg') }}');">
+                <span class="link-text">Equinox Referral</span>
+            </div>
+        </a>
+
+        <a href="https://www.referyourchasecard.com/19q/39UH25LIE2" class="link-button" target="_blank">
+            <div class="link-image"
+                style="background-image: url('{{ url_for('static', filename='images/chase-preview.webp') }}');">
+                <span class="link-text">Chase Referral</span>
+            </div>
+        </a>
+
+        <a href="https://dashboard.m1.com/signup/referrals?referrerCode=2xNRzQybNlnb&utm_medium=referral&utm_campaign=31835&utm_source=2xNRzQybNlnb"
+            class="link-button" target="_blank">
+            <div class="link-image"
+                style="background-image: url('{{ url_for('static', filename='images/m1-preview.png') }}');">
+                <span class="link-text">M1 Referral</span>
+            </div>
+        </a>
+
+        <!-- Add other link buttons following the same pattern -->
+    </div>
+</div>
+{% endblock %}

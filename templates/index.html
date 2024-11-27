@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="home-container">
+    <h1 class="main-title">THESAINTMARCUS</h1>
+    <div class="home-links">
+        <a href="{{ url_for('photography') }}">PHOTOGRAPHY</a>
+        <a href="https://www.shawthewall.com" target="_blank">SHAWTHEWALL</a>
+        <a href="{{ url_for('tesla') }}">PROJECT TESLA</a>
+        <a href="{{ url_for('links') }}">LINK IN BIO</a>
+    </div>
+    <div class="social-links">
+        <a href="https://www.youtube.com/YourChannel" target="_blank" aria-label="YouTube">
+            <i class="fab fa-youtube"></i>
+        </a>
+        <a href="https://www.instagram.com/YourInstagram" target="_blank" aria-label="Instagram">
+            <i class="fab fa-instagram"></i>
+        </a>
+    </div>
+</div>
+{% endblock %}

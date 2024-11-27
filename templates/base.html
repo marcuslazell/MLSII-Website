@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>THESAINTMARCUS</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+
+<body>
+    {% if request.endpoint != 'index' %}
+    <nav>
+        <a href="{{ url_for('index') }}" class="logo">THESAINTMARCUS</a>
+        <div class="nav-links">
+            <a href="{{ url_for('photography') }}">PHOTOGRAPHY</a>
+            <a href="https://www.shawthewall.com" target="_blank">SHAWTHEWALL</a>
+            <a href="{{ url_for('tesla') }}">PROJECT TESLA</a>
+            <a href="{{ url_for('links') }}">LINK IN BIO</a>
+        </div>
+    </nav>
+    {% endif %}
+
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+</body>
+
+</html>
