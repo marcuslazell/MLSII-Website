@@ -5,25 +5,46 @@
     <div class="tesla-content">
         <h1>PROJECT TESLA</h1>
 
-        <!-- Vehicle Status -->
         <div class="vehicle-status">
-            <h2>Vehicle Status</h2>
-            <p id="batteryLevel">Battery: Loading...</p>
-            <p id="chargingState">State: Loading...</p>
-            <p id="range">Range: Loading...</p>
-        </div>
-
-        <!-- Controls -->
-        <div class="controls">
-            <button onclick="startCharging()">Start Charging</button>
-            <button onclick="stopCharging()">Stop Charging</button>
-            <button onclick="honkHorn()">Honk Horn</button>
-            <button onclick="flashLights()">Flash Lights</button>
+            <div class="status-item">
+                <h3>Battery Level</h3>
+                <p id="batteryLevel">Loading...</p>
+            </div>
+            <div class="status-item">
+                <h3>Charging State</h3>
+                <p id="chargingState">Loading...</p>
+            </div>
+            <div class="status-item">
+                <h3>Range</h3>
+                <p id="range">Loading...</p>
+            </div>
         </div>
     </div>
 </div>
 
 <script>
-    // Add JavaScript for Tesla controls here
+    async function updateTeslaStatus() {
+        try {
+            const response = await fetch('/api/tesla/status');
+            const data = await response.json();
+
+            if (response.ok) {
+                document.getElementById('batteryLevel').textContent = `${data.battery_level}%`;
+                document.getElementById('chargingState').textContent = data.charging_state;
+                document.getElementById('range').textContent = `${data.range} miles`;
+            } else {
+                throw new Error(data.error || 'Failed to fetch Tesla data');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            document.getElementById('batteryLevel').textContent = 'Error loading data';
+            document.getElementById('chargingState').textContent = 'Error loading data';
+            document.getElementById('range').textContent = 'Error loading data';
+        }
+    }
+
+    // Update immediately and then every 60 seconds
+    updateTeslaStatus();
+    setInterval(updateTeslaStatus, 60000);
 </script>
 {% endblock %}

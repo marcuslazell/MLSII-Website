@@ -3,6 +3,7 @@ from flask import Flask, render_template, request, url_for, jsonify
 from werkzeug.utils import secure_filename
 from dotenv import load_dotenv
 from functools import wraps
+from tesla_api import TeslaApiClient
 
 # Initialize Flask and load environment variables
 app = Flask(__name__)
@@ -49,6 +50,24 @@ def photography():
 @app.route('/tesla')
 def tesla():
     return render_template('tesla.html')
+
+@app.route('/api/tesla/status', methods=['GET'])
+async def get_tesla_status():
+    try:
+        client = TeslaApiClient(
+            email=os.getenv('TESLA_EMAIL'),
+            password=os.getenv('TESLA_PASSWORD')
+        )
+        vehicles = await client.list_vehicles()
+        vehicle = vehicles[0]
+        data = {
+            'battery_level': await vehicle.charge_state()['battery_level'],
+            'charging_state': await vehicle.charge_state()['charging_state'],
+            'range': await vehicle.charge_state()['battery_range']
+        }
+        return jsonify(data)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 @app.route('/links')
 def links():

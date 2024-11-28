@@ -355,6 +355,31 @@ main {
     letter-spacing: 2px;
 }
 
+.vehicle-status {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
+    margin-top: 2rem;
+    padding: 2rem;
+    background: #f8f8f8;
+    border-radius: 8px;
+}
+
+.status-item {
+    text-align: center;
+}
+
+.status-item h3 {
+    color: #666;
+    margin-bottom: 0.5rem;
+}
+
+.status-item p {
+    font-size: 1.5rem;
+    color: #333;
+    font-weight: bold;
+}
+
 /* Social Media Icons */
 .social-links {
     display: flex;
