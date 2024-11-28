@@ -4,7 +4,26 @@
 <div class="tesla-container">
     <div class="tesla-content">
         <h1>PROJECT TESLA</h1>
-        <p>Coming Soon...</p>
+
+        <!-- Vehicle Status -->
+        <div class="vehicle-status">
+            <h2>Vehicle Status</h2>
+            <p id="batteryLevel">Battery: Loading...</p>
+            <p id="chargingState">State: Loading...</p>
+            <p id="range">Range: Loading...</p>
+        </div>
+
+        <!-- Controls -->
+        <div class="controls">
+            <button onclick="startCharging()">Start Charging</button>
+            <button onclick="stopCharging()">Stop Charging</button>
+            <button onclick="honkHorn()">Honk Horn</button>
+            <button onclick="flashLights()">Flash Lights</button>
+        </div>
     </div>
 </div>
+
+<script>
+    // Add JavaScript for Tesla controls here
+</script>
 {% endblock %}

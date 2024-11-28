@@ -1,15 +1,30 @@
 import os
-from flask import Flask, render_template, request, url_for
+from flask import Flask, render_template, request, url_for, jsonify
 from werkzeug.utils import secure_filename
+from tesla_api import TeslaApiClient
+from dotenv import load_dotenv
+from functools import wraps
 
+# Initialize Flask and load environment variables
 app = Flask(__name__)
+load_dotenv()
 
-# Update the upload folder path to match new structure
-UPLOAD_FOLDER = 'static/portfolio'  # Changed from 'static/images/portfolio'
+# Configuration
+UPLOAD_FOLDER = 'static/portfolio'
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'mp4'}
-
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
+# Security decorator
+def require_api_key(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        api_key = request.headers.get('X-Api-Key')
+        if api_key and api_key == os.getenv('API_KEY'):
+            return f(*args, **kwargs)
+        return jsonify({'message': 'Unauthorized'}), 401
+    return decorated
+
+# Helper functions
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
@@ -18,7 +33,7 @@ def get_file_type(filename):
     return 'video' if ext == 'mp4' else 'image'
 
 def get_portfolio_items():
-    portfolio_path = os.path.join(app.static_folder, 'portfolio')  # Changed from 'images/portfolio'
+    portfolio_path = os.path.join(app.static_folder, 'portfolio')
     if not os.path.exists(portfolio_path):
         os.makedirs(portfolio_path)
     
@@ -26,12 +41,31 @@ def get_portfolio_items():
     for filename in os.listdir(portfolio_path):
         if allowed_file(filename):
             items.append({
-                'url': url_for('static', filename=f'portfolio/{filename}'),  # Changed from 'images/portfolio/{filename}'
+                'url': url_for('static', filename=f'portfolio/{filename}'),
                 'description': filename.split('.')[0],
                 'type': get_file_type(filename)
             })
     return items
 
+# Tesla API functions
+async def connect_tesla():
+    email = os.getenv('TESLA_EMAIL')
+    password = os.getenv('TESLA_PASSWORD')
+    client = TeslaApiClient(email, password)
+    return client
+
+async def get_vehicle_data():
+    client = await connect_tesla()
+    vehicles = await client.list_vehicles()
+    return vehicles
+
+async def set_charging_limit(limit):
+    client = await connect_tesla()
+    vehicles = await client.list_vehicles()
+    vehicle = vehicles[0]
+    await vehicle.controls.set_charge_limit(limit)
+
+# Routes
 @app.route('/')
 def index():
     return render_template('index.html')
@@ -48,6 +82,16 @@ def tesla():
 @app.route('/links')
 def links():
     return render_template('links.html')
+
+# API Routes
+@app.route('/api/tesla/status', methods=['GET'])
+@require_api_key
+async def get_status():
+    try:
+        vehicles = await get_vehicle_data()
+        return jsonify({'status': 'success', 'data': vehicles})
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)})
 
 @app.route('/upload', methods=['POST'])
 def upload_file():
