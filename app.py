@@ -1,7 +1,6 @@
 import os
 from flask import Flask, render_template, request, url_for, jsonify
 from werkzeug.utils import secure_filename
-from tesla_api import TeslaApiClient
 from dotenv import load_dotenv
 from functools import wraps
 
@@ -13,16 +12,6 @@ load_dotenv()
 UPLOAD_FOLDER = 'static/portfolio'
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'mp4'}
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-
-# Security decorator
-def require_api_key(f):
-    @wraps(f)
-    def decorated(*args, **kwargs):
-        api_key = request.headers.get('X-Api-Key')
-        if api_key and api_key == os.getenv('API_KEY'):
-            return f(*args, **kwargs)
-        return jsonify({'message': 'Unauthorized'}), 401
-    return decorated
 
 # Helper functions
 def allowed_file(filename):
@@ -47,24 +36,6 @@ def get_portfolio_items():
             })
     return items
 
-# Tesla API functions
-async def connect_tesla():
-    email = os.getenv('TESLA_EMAIL')
-    password = os.getenv('TESLA_PASSWORD')
-    client = TeslaApiClient(email, password)
-    return client
-
-async def get_vehicle_data():
-    client = await connect_tesla()
-    vehicles = await client.list_vehicles()
-    return vehicles
-
-async def set_charging_limit(limit):
-    client = await connect_tesla()
-    vehicles = await client.list_vehicles()
-    vehicle = vehicles[0]
-    await vehicle.controls.set_charge_limit(limit)
-
 # Routes
 @app.route('/')
 def index():
@@ -83,16 +54,7 @@ def tesla():
 def links():
     return render_template('links.html')
 
-# API Routes
-@app.route('/api/tesla/status', methods=['GET'])
-@require_api_key
-async def get_status():
-    try:
-        vehicles = await get_vehicle_data()
-        return jsonify({'status': 'success', 'data': vehicles})
-    except Exception as e:
-        return jsonify({'status': 'error', 'message': str(e)})
-
+# File upload route
 @app.route('/upload', methods=['POST'])
 def upload_file():
     if 'file' not in request.files:
