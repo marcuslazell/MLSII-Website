@@ -6,7 +6,7 @@ from flask import Flask, render_template, request, url_for, jsonify
 from werkzeug.utils import secure_filename
 from dotenv import load_dotenv
 from functools import wraps
-from tesla_api import TeslaApiClient
+# Removing tesla_api import temporarily
 
 # Initialize Flask and load environment variables
 app = Flask(__name__)
@@ -101,25 +101,18 @@ def photography():
 
 @app.route('/tesla')
 def tesla():
+    # Temporarily returning a simple template without Tesla API functionality
     return render_template('tesla.html')
 
 @app.route('/api/tesla/status', methods=['GET'])
-async def get_tesla_status():
-    try:
-        client = TeslaApiClient(
-            email=os.getenv('TESLA_EMAIL'),
-            password=os.getenv('TESLA_PASSWORD')
-        )
-        vehicles = await client.list_vehicles()
-        vehicle = vehicles[0]
-        data = {
-            'battery_level': await vehicle.charge_state()['battery_level'],
-            'charging_state': await vehicle.charge_state()['charging_state'],
-            'range': await vehicle.charge_state()['battery_range']
-        }
-        return jsonify(data)
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
+def get_tesla_status():
+    # Temporarily returning mock data
+    mock_data = {
+        'battery_level': 75,
+        'charging_state': 'Disconnected',
+        'range': 250
+    }
+    return jsonify(mock_data)
 
 @app.route('/links')
 def links():
@@ -142,7 +135,6 @@ def upload_file():
             file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
             
         # TODO: Add Bunny.net upload logic here using their API
-        # This would involve sending the file to Bunny Storage Zone
         
         portfolio_manager.add_portfolio_item(filename)
         return 'File uploaded successfully'
