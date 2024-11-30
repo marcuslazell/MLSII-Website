@@ -1,50 +1,9 @@
 {% extends "base.html" %}
-
 {% block content %}
 <div class="tesla-container">
     <div class="tesla-content">
         <h1>PROJECT TESLA</h1>
-
-        <div class="vehicle-status">
-            <div class="status-item">
-                <h3>Battery Level</h3>
-                <p id="batteryLevel">Loading...</p>
-            </div>
-            <div class="status-item">
-                <h3>Charging State</h3>
-                <p id="chargingState">Loading...</p>
-            </div>
-            <div class="status-item">
-                <h3>Range</h3>
-                <p id="range">Loading...</p>
-            </div>
-        </div>
+        <p>Coming Soon</p>
     </div>
 </div>
-
-<script>
-    async function updateTeslaStatus() {
-        try {
-            const response = await fetch('/api/tesla/status');
-            const data = await response.json();
-
-            if (response.ok) {
-                document.getElementById('batteryLevel').textContent = `${data.battery_level}%`;
-                document.getElementById('chargingState').textContent = data.charging_state;
-                document.getElementById('range').textContent = `${data.range} miles`;
-            } else {
-                throw new Error(data.error || 'Failed to fetch Tesla data');
-            }
-        } catch (error) {
-            console.error('Error:', error);
-            document.getElementById('batteryLevel').textContent = 'Error loading data';
-            document.getElementById('chargingState').textContent = 'Error loading data';
-            document.getElementById('range').textContent = 'Error loading data';
-        }
-    }
-
-    // Update immediately and then every 60 seconds
-    updateTeslaStatus();
-    setInterval(updateTeslaStatus, 60000);
-</script>
 {% endblock %}

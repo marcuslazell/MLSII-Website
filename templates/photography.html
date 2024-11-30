@@ -1,6 +1,5 @@
 {% extends "base.html" %}
 {% block content %}
-
 <div class="photography-container">
     <div class="sidebar">
         <div class="profile-image">
@@ -20,16 +19,18 @@
             <div class="portfolio-item">
                 {% if item.type == 'video' %}
                 <video controls>
-                    <source src="{{ item.bunny_url }}" type="video/mp4">
+                    <source src="{{ item.url }}" type="video/mp4">
                     Your browser does not support the video tag.
                 </video>
                 {% else %}
-                <img src="{{ item.bunny_url }}" alt="{{ item.description }}">
+                <img src="{{ item.url }}" alt="{{ item.description }}" loading="lazy">
                 {% endif %}
+                <div class="portfolio-item-overlay">
+                    <p class="portfolio-item-description">{{ item.description }}</p>
+                </div>
             </div>
             {% endfor %}
         </div>
     </div>
 </div>
-
 {% endblock %}

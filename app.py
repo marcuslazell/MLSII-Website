@@ -1,145 +1,123 @@
 import os
+import requests
 from dataclasses import dataclass
-from typing import List, Optional
-import json
-from flask import Flask, render_template, request, url_for, jsonify
-from werkzeug.utils import secure_filename
+from typing import List
+from flask import Flask, render_template
 from dotenv import load_dotenv
-from functools import wraps
-# Removing tesla_api import temporarily
 
 # Initialize Flask and load environment variables
 app = Flask(__name__)
 load_dotenv()
 
-# Configuration
-UPLOAD_FOLDER = 'static/portfolio'
-ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'mp4'}
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-
-# Portfolio data structures
 @dataclass
-class PortfolioItem:
+class MediaItem:
+    """Data structure for media items (images/videos)"""
     filename: str
-    description: str
+    url: str
     type: str
-    bunny_url: str
+    description: str
 
-class BunnyConfig:
+class BunnyManager:
+    """Handles all Bunny.net CDN interactions"""
     def __init__(self):
-        self.pull_zone_url = os.getenv('BUNNY_PULLZONE_URL', 'https://your-pullzone.b-cdn.net')
-        self.storage_zone_url = os.getenv('BUNNY_STORAGE_URL', 'https://storage.bunnycdn.com')
-        self.storage_zone = os.getenv('BUNNY_STORAGE_ZONE')
+        # Note: Storage zone name must exactly match Bunny.net username
+        self.storage_zone = "mlsii-website"  # Fixed the name to match Bunny.net
         self.access_key = os.getenv('BUNNY_ACCESS_KEY')
+        self.pull_zone = os.getenv('BUNNY_PULLZONE_URL')
         
-    @property
-    def is_configured(self) -> bool:
-        return all([self.pull_zone_url, self.storage_zone, self.access_key])
-
-class PortfolioManager:
-    def __init__(self, app):
-        self.app = app
-        self.bunny_config = BunnyConfig()
-        self.portfolio_data_path = os.path.join(app.static_folder, 'portfolio_data.json')
-        
-    def get_bunny_url(self, filename: str) -> str:
-        return f"{self.bunny_config.pull_zone_url}/portfolio/{filename}"
+        print("\n=== Bunny.net Configuration ===")
+        print(f"Storage Zone: {self.storage_zone}")
+        print(f"Pull Zone: {self.pull_zone}")
+        print(f"Access Key (first 10 chars): {self.access_key[:10] if self.access_key else 'None'}")
     
-    def get_file_type(self, filename: str) -> str:
-        ext = filename.rsplit('.', 1)[1].lower()
-        return 'video' if ext == 'mp4' else 'image'
+    def get_media_type(self, filename: str) -> str:
+        """Determine if file is video or image based on extension"""
+        return 'video' if filename.lower().endswith('.mp4') else 'image'
     
-    def load_portfolio_data(self) -> List[PortfolioItem]:
-        if not os.path.exists(self.portfolio_data_path):
-            return []
+    def get_description(self, filename: str) -> str:
+        """Generate a readable description from filename"""
+        base = filename.rsplit('.', 1)[0]
+        return base.replace('_', ' ').replace('-', ' ').title()
+    
+    def get_cdn_url(self, filename: str) -> str:
+        """Generate CDN URL for a file"""
+        return f"{self.pull_zone}/{filename}"
+    
+    def list_media(self) -> List[MediaItem]:
+        """Fetch all media files from storage"""
+        try:
+            url = f"https://la.storage.bunnycdn.com/{self.storage_zone}/"
+            headers = {
+                'AccessKey': self.access_key,
+                'Accept': 'application/json'
+            }
             
-        try:
-            with open(self.portfolio_data_path, 'r') as f:
-                data = json.load(f)
-                return [PortfolioItem(**item) for item in data]
+            print("\n=== Making Request ===")
+            print(f"URL: {url}")
+            print(f"Headers: {headers}")
+            
+            response = requests.get(url, headers=headers)
+            
+            print("\n=== Response ===")
+            print(f"Status: {response.status_code}")
+            print(f"Headers: {dict(response.headers)}")
+            print(f"Content: {response.text[:200]}")
+            
+            if response.status_code == 401:
+                print("\n!!! Authentication Error !!!")
+                print("Please verify:")
+                print("1. Storage Zone name is correct (check for typos)")
+                print("2. Access Key is correct and not expired")
+                print("3. Access Key has appropriate permissions")
+                return []
+            
+            response.raise_for_status()
+            files = response.json()
+            
+            media_items = []
+            for file in files:
+                filename = file['ObjectName']
+                if not filename.lower().endswith(('.jpg', '.jpeg', '.png', '.gif', '.mp4')):
+                    continue
+                    
+                media_items.append(MediaItem(
+                    filename=filename,
+                    url=self.get_cdn_url(filename),
+                    type=self.get_media_type(filename),
+                    description=self.get_description(filename)
+                ))
+                print(f"Added: {filename}")
+            
+            return sorted(media_items, key=lambda x: x.filename)
+            
         except Exception as e:
-            self.app.logger.error(f"Error loading portfolio data: {e}")
+            app.logger.error(f"Error fetching media: {str(e)}")
+            print(f"\n=== Error ===\n{str(e)}")
             return []
-    
-    def save_portfolio_data(self, items: List[PortfolioItem]):
-        try:
-            with open(self.portfolio_data_path, 'w') as f:
-                json.dump([vars(item) for item in items], f, indent=2)
-        except Exception as e:
-            self.app.logger.error(f"Error saving portfolio data: {e}")
-    
-    def add_portfolio_item(self, filename: str, description: Optional[str] = None) -> PortfolioItem:
-        items = self.load_portfolio_data()
-        
-        new_item = PortfolioItem(
-            filename=filename,
-            description=description or filename.split('.')[0],
-            type=self.get_file_type(filename),
-            bunny_url=self.get_bunny_url(filename)
-        )
-        
-        items.append(new_item)
-        self.save_portfolio_data(items)
-        return new_item
 
-# Helper functions
-def allowed_file(filename):
-    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+# Initialize Bunny.net manager
+bunny = BunnyManager()
 
-# Initialize PortfolioManager
-portfolio_manager = PortfolioManager(app)
-
-# Routes
 @app.route('/')
 def index():
+    """Home page"""
     return render_template('index.html')
 
 @app.route('/photography')
 def photography():
-    portfolio_items = portfolio_manager.load_portfolio_data()
-    return render_template('photography.html', portfolio_items=portfolio_items)
+    """Photography portfolio page"""
+    media_items = bunny.list_media()
+    return render_template('photography.html', portfolio_items=media_items)
 
 @app.route('/tesla')
 def tesla():
-    # Temporarily returning a simple template without Tesla API functionality
+    """Tesla page - placeholder for now"""
     return render_template('tesla.html')
-
-@app.route('/api/tesla/status', methods=['GET'])
-def get_tesla_status():
-    # Temporarily returning mock data
-    mock_data = {
-        'battery_level': 75,
-        'charging_state': 'Disconnected',
-        'range': 250
-    }
-    return jsonify(mock_data)
 
 @app.route('/links')
 def links():
+    """Links/referral page"""
     return render_template('links.html')
-
-@app.route('/upload', methods=['POST'])
-def upload_file():
-    if 'file' not in request.files:
-        return 'No file part'
-        
-    file = request.files['file']
-    if file.filename == '':
-        return 'No selected file'
-        
-    if file and allowed_file(file.filename):
-        filename = secure_filename(file.filename)
-        
-        # Save locally if Bunny.net is not configured
-        if not portfolio_manager.bunny_config.is_configured:
-            file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-            
-        # TODO: Add Bunny.net upload logic here using their API
-        
-        portfolio_manager.add_portfolio_item(filename)
-        return 'File uploaded successfully'
-        
-    return 'Invalid file type'
 
 if __name__ == '__main__':
     app.run(debug=True)
