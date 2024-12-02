@@ -15,9 +15,16 @@
         <div class="portfolio-grid">
             {% for item in portfolio_items %}
             <div class="portfolio-item">
-                <img src="{{ item.url }}" alt="Portfolio Image">
+                {% if item.type == "video" %}
+                <video controls>
+                    <source src="{{ item.url }}" type="video/mp4">
+                    Your browser does not support video playback.
+                </video>
+                {% else %}
+                <img src="{{ item.url }}" alt="{{ item.description }}">
+                {% endif %}
                 <div class="portfolio-item-overlay">
-                    <p class="portfolio-item-description">{{ item.description }}</p>
+                    {{ item.description }}
                 </div>
             </div>
             {% endfor %}
