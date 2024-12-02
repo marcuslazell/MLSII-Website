@@ -5,26 +5,17 @@
         <div class="profile-image">
             <img src="{{ url_for('static', filename='images/profile.png') }}" class="profile-pic" alt="Marcus">
         </div>
-
         <div class="bio">
             <p>This is a bio about Marcus</p>
             <p>Marcus is a great photographer</p>
             <p>His work is loved by many</p>
         </div>
     </div>
-
     <div class="portfolio-wrapper">
         <div class="portfolio-grid">
             {% for item in portfolio_items %}
             <div class="portfolio-item">
-                {% if item.type == 'video' %}
-                <video controls>
-                    <source src="{{ item.url }}" type="video/mp4">
-                    Your browser does not support the video tag.
-                </video>
-                {% else %}
-                <img src="{{ item.url }}" alt="{{ item.description }}" loading="lazy">
-                {% endif %}
+                <img src="{{ item.url }}" alt="Portfolio Image">
                 <div class="portfolio-item-overlay">
                     <p class="portfolio-item-description">{{ item.description }}</p>
                 </div>

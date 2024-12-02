@@ -19,3 +19,8 @@ python-dotenv==1.0.1
 tesla-api==2.0.1
 Werkzeug==2.0.3
 yarl==1.18.0
+Flask==2.0.1
+Werkzeug==2.0.3
+gunicorn
+asgiref==3.7.2
+python-dotenv==1.0.0
