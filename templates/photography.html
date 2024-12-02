@@ -16,15 +16,18 @@
             {% for item in portfolio_items %}
             <div class="portfolio-item">
                 {% if item.type == "video" %}
-                <video controls>
+                <video controls playsinline preload="metadata">
                     <source src="{{ item.url }}" type="video/mp4">
-                    Your browser does not support video playback.
                 </video>
                 {% else %}
-                <img src="{{ item.url }}" alt="{{ item.description }}">
+                <picture>
+                    <source srcset="{{ item.url }}?width=800&format=webp" type="image/webp">
+                    <img src="{{ item.url }}?width=800" alt="{{ item.description }}" loading="lazy" width="800"
+                        height="1000">
+                </picture>
                 {% endif %}
                 <div class="portfolio-item-overlay">
-                    {{ item.description }}
+                    <p>{{ item.description }}</p>
                 </div>
             </div>
             {% endfor %}
