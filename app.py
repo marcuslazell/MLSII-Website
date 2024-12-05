@@ -11,6 +11,9 @@ import logging
 app = Flask(__name__, static_folder='static')
 load_dotenv()
 
+# Add a small delay to ensure environment variables are loaded
+time.sleep(1)
+
 # Set up logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger('app')
@@ -25,8 +28,8 @@ MY_CAR_NAME = "MLSII - Tesla 3"
 
 # Log environment status at startup
 logger.info("Environment Variables Status:")
-logger.info(f"TESLA_EMAIL set: {'Yes' if TESLA_EMAIL else 'No'}")
-logger.info(f"TESLA_REFRESH_TOKEN set: {'Yes' if TESLA_REFRESH_TOKEN else 'No'}")
+logger.info(f"TESLA_EMAIL length: {len(TESLA_EMAIL) if TESLA_EMAIL else 0}")
+logger.info(f"TESLA_REFRESH_TOKEN length: {len(TESLA_REFRESH_TOKEN) if TESLA_REFRESH_TOKEN else 0}")
 logger.info(f"BUNNY_STORAGE_ZONE set: {'Yes' if BUNNY_STORAGE_ZONE else 'No'}")
 logger.info(f"BUNNY_API_KEY set: {'Yes' if BUNNY_API_KEY else 'No'}")
 logger.info(f"BUNNY_PULL_ZONE_URL set: {'Yes' if BUNNY_PULL_ZONE_URL else 'No'}")
