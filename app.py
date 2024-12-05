@@ -8,12 +8,12 @@ import time
 import json
 import logging
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder='static')
 load_dotenv()
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('app')
 
 # Environment variables with fallbacks for better error handling
 BUNNY_STORAGE_ZONE = os.environ.get('BUNNY_STORAGE_ZONE')
@@ -23,88 +23,76 @@ TESLA_EMAIL = os.environ.get('TESLA_EMAIL')
 TESLA_REFRESH_TOKEN = os.environ.get('TESLA_REFRESH_TOKEN')
 MY_CAR_NAME = "MLSII - Tesla 3"
 
-def refresh_tesla_token():
-    """Get a new access token using refresh token."""
-    try:
-        logger.info(f"Attempting to refresh token with email: {TESLA_EMAIL}")
-        logger.info(f"Refresh token exists: {bool(TESLA_REFRESH_TOKEN)}")
-        
-        url = "https://auth.tesla.com/oauth2/v3/token"
-        headers = {"Content-Type": "application/json"}
-        data = {
-            "grant_type": "refresh_token",
-            "client_id": "ownerapi",
-            "refresh_token": TESLA_REFRESH_TOKEN,
-            "scope": "openid email offline_access"
-        }
-        
-        response = requests.post(url, headers=headers, json=data)
-        response.raise_for_status()
-        return response.json().get('access_token')
-    except Exception as e:
-        logger.error(f"Error refreshing token: {str(e)}")
-        return None
+# Log environment status at startup
+logger.info("Environment Variables Status:")
+logger.info(f"TESLA_EMAIL set: {'Yes' if TESLA_EMAIL else 'No'}")
+logger.info(f"TESLA_REFRESH_TOKEN set: {'Yes' if TESLA_REFRESH_TOKEN else 'No'}")
+logger.info(f"BUNNY_STORAGE_ZONE set: {'Yes' if BUNNY_STORAGE_ZONE else 'No'}")
+logger.info(f"BUNNY_API_KEY set: {'Yes' if BUNNY_API_KEY else 'No'}")
+logger.info(f"BUNNY_PULL_ZONE_URL set: {'Yes' if BUNNY_PULL_ZONE_URL else 'No'}")
 
 def get_tesla_data():
     """Fetch Tesla vehicle data with improved error handling."""
     try:
-        if not all([TESLA_EMAIL, TESLA_REFRESH_TOKEN]):
-            logger.error("Missing Tesla credentials in environment")
-            logger.info(f"Email exists: {bool(TESLA_EMAIL)}")
-            logger.info(f"Refresh token exists: {bool(TESLA_REFRESH_TOKEN)}")
-            return None
-
-        logger.info("Attempting to connect to Tesla API...")
-        tesla = teslapy.Tesla(TESLA_EMAIL)
+        logger.info("Starting Tesla data fetch...")
         
-        # Use refresh token flow
-        access_token = refresh_tesla_token()
-        if not access_token:
-            logger.error("Failed to get access token")
+        if not TESLA_EMAIL or not TESLA_REFRESH_TOKEN:
+            logger.error(f"Missing credentials - Email: {bool(TESLA_EMAIL)}, Token: {bool(TESLA_REFRESH_TOKEN)}")
             return None
+        
+        logger.info("Creating Tesla instance...")
+        with teslapy.Tesla(TESLA_EMAIL) as tesla:
+            # Set the refresh token directly
+            tesla.refresh_token = TESLA_REFRESH_TOKEN
             
-        tesla.token['access_token'] = access_token
-        
-        logger.info("Getting vehicle list...")
-        vehicles = tesla.vehicle_list()
-        if not vehicles:
-            logger.error("No vehicles found")
-            return None
-
-        # Find specific car
-        my_car = None
-        for v in vehicles:
-            logger.info(f"Found vehicle: {v['display_name']}")
-            if v['display_name'] == MY_CAR_NAME:
-                my_car = v
-                break
-        
-        if not my_car:
-            logger.error(f"Could not find car named {MY_CAR_NAME}")
-            return None
-
-        current_state = my_car['state']
-        logger.info(f"Car state: {current_state}")
-        
-        if current_state == 'online':
             try:
-                logger.info("Getting vehicle data...")
-                data = my_car.get_vehicle_data()
-                charge_state = data['charge_state']
-                
-                return {
-                    'battery_level': charge_state['battery_level'],
-                    'range': int(charge_state['battery_range']),
-                    'state': 'online'
-                }
+                logger.info("Fetching token...")
+                tesla.fetch_token()
+                logger.info("Token fetch successful")
             except Exception as e:
-                logger.error(f"Failed to get vehicle data: {str(e)}")
+                logger.error(f"Token fetch failed: {str(e)}")
+                return None
+
+            logger.info("Getting vehicle list...")
+            vehicles = tesla.vehicle_list()
+            
+            if not vehicles:
+                logger.error("No vehicles found")
+                return None
+
+            # Find specific car
+            my_car = None
+            for v in vehicles:
+                logger.info(f"Found vehicle: {v['display_name']}")
+                if v['display_name'] == MY_CAR_NAME:
+                    my_car = v
+                    break
+
+            if not my_car:
+                logger.error(f"Could not find car named {MY_CAR_NAME}")
+                return None
+
+            current_state = my_car['state']
+            logger.info(f"Car state: {current_state}")
+
+            if current_state == 'online':
+                try:
+                    data = my_car.get_vehicle_data()
+                    charge_state = data['charge_state']
+                    return {
+                        'battery_level': charge_state['battery_level'],
+                        'range': int(charge_state['battery_range']),
+                        'state': 'online'
+                    }
+                except Exception as e:
+                    logger.error(f"Failed to get vehicle data: {str(e)}")
+                    return {'state': current_state}
+            else:
                 return {'state': current_state}
-        else:
-            return {'state': current_state}
-                
+
     except Exception as e:
         logger.error(f"Tesla API Error: {str(e)}")
+        logger.exception("Full traceback:")
         return None
 
 def get_media_from_bunny():
