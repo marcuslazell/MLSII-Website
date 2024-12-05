@@ -26,7 +26,7 @@ TESLA_EMAIL = os.environ.get('TESLA_EMAIL')
 TESLA_REFRESH_TOKEN = os.environ.get('TESLA_REFRESH_TOKEN')
 MY_CAR_NAME = "MLSII - Tesla 3"
 
-# At the start of get_tesla_data():
+# Log environment checks at startup
 logger.info(f"Environment check - TESLA_EMAIL: {'Set' if TESLA_EMAIL else 'Not Set'}")
 logger.info(f"Environment check - TESLA_REFRESH_TOKEN: {'Set' if TESLA_REFRESH_TOKEN else 'Not Set'}")
 
@@ -39,7 +39,7 @@ logger.info(f"BUNNY_API_KEY set: {'Yes' if BUNNY_API_KEY else 'No'}")
 logger.info(f"BUNNY_PULL_ZONE_URL set: {'Yes' if BUNNY_PULL_ZONE_URL else 'No'}")
 
 def get_tesla_data():
-    """Fetch Tesla vehicle data with improved error handling."""
+    """Fetch Tesla vehicle data using Fleet API with improved error handling."""
     try:
         logger.info("Starting Tesla data fetch...")
         
@@ -49,8 +49,11 @@ def get_tesla_data():
         
         logger.info("Creating Tesla instance...")
         with teslapy.Tesla(TESLA_EMAIL) as tesla:
-            # Set the refresh token directly
+            # Configure for Fleet API
             tesla.refresh_token = TESLA_REFRESH_TOKEN
+            tesla.base_url = "https://fleet-api.prd.na.vn.cloud.tesla.com/api/1"
+            tesla.endpoints['VEHICLE_LIST'] = '/vehicles'
+            tesla.endpoints['VEHICLE_DATA'] = '/vehicles/{vehicle_id}/vehicle_data'
             
             try:
                 logger.info("Fetching token...")
@@ -61,7 +64,11 @@ def get_tesla_data():
                 return None
 
             logger.info("Getting vehicle list...")
-            vehicles = tesla.vehicle_list()
+            try:
+                vehicles = tesla.api('VEHICLE_LIST')['response']
+            except Exception as e:
+                logger.error(f"Failed to get vehicle list: {str(e)}")
+                return None
             
             if not vehicles:
                 logger.error("No vehicles found")
@@ -84,7 +91,7 @@ def get_tesla_data():
 
             if current_state == 'online':
                 try:
-                    data = my_car.get_vehicle_data()
+                    data = tesla.api('VEHICLE_DATA', vehicle_id=my_car['id'])['response']
                     charge_state = data['charge_state']
                     return {
                         'battery_level': charge_state['battery_level'],
