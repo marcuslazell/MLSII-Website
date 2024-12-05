@@ -1,9 +1,24 @@
 {% extends "base.html" %}
 {% block content %}
+
 <div class="tesla-container">
     <div class="tesla-content">
         <h1>PROJECT TESLA</h1>
-        <p>Coming Soon</p>
+
+        {% if tesla_data %}
+        {% if tesla_data.state == 'online' %}
+        <p>{{ tesla_data.battery_level }}%</p>
+        <p>{{ tesla_data.range }} mi</p>
+        <p>Online</p>
+        {% elif tesla_data.state == 'asleep' %}
+        <p>Vehicle is asleep</p>
+        {% else %}
+        <p>Vehicle is {{ tesla_data.state }}</p>
+        {% endif %}
+        {% else %}
+        <p>Unable to fetch Tesla data. Please try again later.</p>
+        {% endif %}
     </div>
 </div>
+
 {% endblock %}

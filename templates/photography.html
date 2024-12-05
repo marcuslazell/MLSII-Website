@@ -1,37 +1,40 @@
 {% extends "base.html" %}
 {% block content %}
+
 <div class="photography-container">
+    <!-- Bio section -->
     <div class="sidebar">
         <div class="profile-image">
-            <img src="{{ url_for('static', filename='images/profile.png') }}" class="profile-pic" alt="Marcus">
+            <img src="{{ url_for('static', filename='images/profile.png') }}" alt="Marcus" class="profile-pic">
         </div>
+
         <div class="bio">
             <p>This is a bio about Marcus</p>
             <p>Marcus is a great photographer</p>
             <p>His work is loved by many</p>
         </div>
     </div>
+
+    <!-- Portfolio section -->
     <div class="portfolio-wrapper">
         <div class="portfolio-grid">
             {% for item in portfolio_items %}
             <div class="portfolio-item">
                 {% if item.type == "video" %}
-                <video controls playsinline preload="metadata">
-                    <source src="{{ item.url }}" type="video/mp4">
+                <video src="{{ item.url }}" controls preload="metadata">
+                    Your browser does not support the video tag.
                 </video>
                 {% else %}
-                <picture>
-                    <source srcset="{{ item.url }}?width=800&format=webp" type="image/webp">
-                    <img src="{{ item.url }}?width=800" alt="{{ item.description }}" loading="lazy" width="800"
-                        height="1000">
-                </picture>
+                <img src="{{ item.url }}?width=800" alt="{{ item.description }}" loading="lazy" width="800"
+                    height="1000">
                 {% endif %}
                 <div class="portfolio-item-overlay">
-                    <p>{{ item.description }}</p>
+                    {{ item.description }}
                 </div>
             </div>
             {% endfor %}
         </div>
     </div>
 </div>
+
 {% endblock %}
