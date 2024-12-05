@@ -21,9 +21,9 @@
     </nav>
     {% endif %}
 
-    <div role="main">
+    <main role="main">
         {% block content %}{% endblock %}
-    </div>
+    </main>
 
     <div class="social-links">
         <a href="https://www.youtube.com/@thesaintmarcus" target="_blank" aria-label="YouTube">
@@ -39,6 +39,8 @@
             </svg>
         </a>
     </div>
+
+    <script src="{{ url_for('static', filename='js/menu.js') }}"></script>
 </body>
 
 </html>

@@ -6,10 +6,14 @@ from dotenv import load_dotenv
 import teslapy
 import time
 import json
-from datetime import datetime, timedelta
+import logging
 
 app = Flask(__name__)
 load_dotenv()
+
+# Set up logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 # Environment variables with fallbacks for better error handling
 BUNNY_STORAGE_ZONE = os.environ.get('BUNNY_STORAGE_ZONE')
@@ -22,6 +26,9 @@ MY_CAR_NAME = "MLSII - Tesla 3"
 def refresh_tesla_token():
     """Get a new access token using refresh token."""
     try:
+        logger.info(f"Attempting to refresh token with email: {TESLA_EMAIL}")
+        logger.info(f"Refresh token exists: {bool(TESLA_REFRESH_TOKEN)}")
+        
         url = "https://auth.tesla.com/oauth2/v3/token"
         headers = {"Content-Type": "application/json"}
         data = {
@@ -33,53 +40,55 @@ def refresh_tesla_token():
         
         response = requests.post(url, headers=headers, json=data)
         response.raise_for_status()
-        return response.json()['access_token']
+        return response.json().get('access_token')
     except Exception as e:
-        print(f"Error refreshing token: {e}")
+        logger.error(f"Error refreshing token: {str(e)}")
         return None
 
 def get_tesla_data():
     """Fetch Tesla vehicle data with improved error handling."""
     try:
-        if not TESLA_EMAIL or not TESLA_REFRESH_TOKEN:
-            print("Tesla credentials not configured in environment")
+        if not all([TESLA_EMAIL, TESLA_REFRESH_TOKEN]):
+            logger.error("Missing Tesla credentials in environment")
+            logger.info(f"Email exists: {bool(TESLA_EMAIL)}")
+            logger.info(f"Refresh token exists: {bool(TESLA_REFRESH_TOKEN)}")
             return None
 
-        print("\nAttempting to connect to Tesla API...")
+        logger.info("Attempting to connect to Tesla API...")
         tesla = teslapy.Tesla(TESLA_EMAIL)
         
         # Use refresh token flow
         access_token = refresh_tesla_token()
         if not access_token:
+            logger.error("Failed to get access token")
             return None
             
         tesla.token['access_token'] = access_token
         
-        print("Getting vehicle list...")
+        logger.info("Getting vehicle list...")
         vehicles = tesla.vehicle_list()
         if not vehicles:
-            print("No vehicles found")
+            logger.error("No vehicles found")
             return None
 
         # Find specific car
         my_car = None
         for v in vehicles:
-            print(f"Found vehicle: {v['display_name']}")
+            logger.info(f"Found vehicle: {v['display_name']}")
             if v['display_name'] == MY_CAR_NAME:
                 my_car = v
                 break
         
         if not my_car:
-            print(f"Could not find car named {MY_CAR_NAME}")
+            logger.error(f"Could not find car named {MY_CAR_NAME}")
             return None
 
         current_state = my_car['state']
-        print(f"Car state: {current_state}")
+        logger.info(f"Car state: {current_state}")
         
-        # If vehicle is online, get detailed data
         if current_state == 'online':
             try:
-                print("Getting vehicle data...")
+                logger.info("Getting vehicle data...")
                 data = my_car.get_vehicle_data()
                 charge_state = data['charge_state']
                 
@@ -89,19 +98,19 @@ def get_tesla_data():
                     'state': 'online'
                 }
             except Exception as e:
-                print(f"Failed to get vehicle data: {e}")
+                logger.error(f"Failed to get vehicle data: {str(e)}")
                 return {'state': current_state}
         else:
             return {'state': current_state}
                 
     except Exception as e:
-        print(f"Tesla API Error: {str(e)}")
+        logger.error(f"Tesla API Error: {str(e)}")
         return None
 
 def get_media_from_bunny():
     """Fetch media files from BunnyCDN."""
     if not all([BUNNY_STORAGE_ZONE, BUNNY_API_KEY, BUNNY_PULL_ZONE_URL]):
-        print("Bunny CDN credentials not configured")
+        logger.error("Bunny CDN credentials not configured")
         return []
 
     url = f"https://la.storage.bunnycdn.com/{BUNNY_STORAGE_ZONE}/"
@@ -124,7 +133,7 @@ def get_media_from_bunny():
                     })
         return media
     except Exception as e:
-        print(f"Error: {str(e)}")
+        logger.error(f"Error: {str(e)}")
         return []
 
 @app.route('/')

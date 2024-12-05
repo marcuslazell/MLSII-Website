@@ -26,8 +26,6 @@ nav {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    z-index: 1000;
-    /* Ensure nav stays on top */
 }
 
 .logo {
@@ -136,7 +134,7 @@ nav {
     border-right: 1px solid #eee;
     display: flex;
     flex-direction: column;
-    justify-content: flex-start;
+    justify-content: center;
     align-items: center;
     background: white;
 }
@@ -166,19 +164,10 @@ nav {
     line-height: 1.6;
     max-width: 280px;
     text-align: center;
-    display: none;
-    /* Hide by default */
 }
 
 .bio p {
     margin-bottom: 1rem;
-}
-
-/* Only show bio on desktop */
-@media (min-width: 769px) {
-    .bio {
-        display: block;
-    }
 }
 
 .portfolio-wrapper {
@@ -229,8 +218,6 @@ nav {
 
 .tesla-content {
     text-align: center;
-    position: relative;
-    z-index: 1;
 }
 
 .tesla-stats {
@@ -316,57 +303,107 @@ nav {
     text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
 }
 
+/* Mobile Menu Button */
+.menu-button {
+    display: none;
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    width: 40px;
+    height: 40px;
+    background: rgba(0, 0, 0, 0.8);
+    border-radius: 8px;
+    z-index: 1001;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+.menu-button span {
+    display: block;
+    width: 20px;
+    height: 2px;
+    background: white;
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+.menu-button span::before,
+.menu-button span::after {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: white;
+    transition: all 0.3s ease;
+}
+
+.menu-button span::before {
+    transform: translateY(-6px);
+}
+
+.menu-button span::after {
+    transform: translateY(6px);
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
+    .menu-button {
+        display: flex;
+    }
+
     nav {
-        position: fixed;
-        /* Keep nav fixed on mobile */
+        transform: translateX(100%);
+        transition: transform 0.3s ease;
         width: 100%;
-        height: auto;
-        padding: 1rem;
-        background: white;
-        z-index: 1000;
+        background: rgba(0, 0, 0, 0.9);
+        padding-top: 80px;
     }
 
-    .main-title {
-        font-size: 2rem;
-        margin: 2rem 1rem;
+    nav.active {
+        transform: translateX(0);
     }
 
-    .home-container {
-        padding: 2rem;
-        height: calc(100vh - 4rem);
+    .nav-links a {
+        color: white;
+        font-size: 1.2rem;
+    }
+
+    .logo {
+        color: white;
     }
 
     .portfolio-container {
         grid-template-columns: 1fr;
         margin-right: 0;
         height: auto;
-        padding-top: 60px;
-        /* Add space for fixed nav */
     }
 
     .sidebar {
         position: relative;
         height: auto;
         border-right: none;
-        padding: 1rem;
-        margin-bottom: 0;
+        padding: 2rem 1rem;
+        margin: 0;
     }
 
     .profile-image {
-        width: 80px;
-        margin-bottom: 0.5rem;
+        width: 120px;
+        margin: 0 auto 1rem;
     }
 
     .creator-tagline {
-        margin-bottom: 1rem;
+        font-size: 1.4rem;
+        margin-bottom: 2rem;
+    }
+
+    .bio {
+        display: none;
     }
 
     .portfolio-wrapper {
         height: auto;
         padding: 1rem;
-        padding-top: 0;
     }
 
     .portfolio-grid {
@@ -376,25 +413,22 @@ nav {
     .tesla-container {
         margin-right: 0;
         padding: 1rem;
-        padding-top: 60px;
-        /* Add space for fixed nav */
+        padding-top: 80px;
     }
 
     .links-container {
         margin-right: 0;
-        padding: 1rem;
-        padding-top: 60px;
-        /* Add space for fixed nav */
+        padding: 2rem 1rem;
+        padding-top: 80px;
     }
 
     .links-grid {
         grid-template-columns: 1fr;
+        gap: 1.5rem;
     }
 
     .social-links {
         position: static;
         margin-top: 2rem;
-        transform: none;
-        justify-content: center;
     }
 }
