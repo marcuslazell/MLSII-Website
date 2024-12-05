@@ -149,6 +149,14 @@ nav {
     border: 1px solid #eee;
 }
 
+.creator-tagline {
+    font-size: 1.1rem;
+    color: #666;
+    letter-spacing: 1.5px;
+    margin-bottom: 2rem;
+    text-align: center;
+}
+
 .bio {
     color: #666;
     line-height: 1.6;
@@ -309,6 +317,16 @@ nav {
         padding: 1rem;
     }
 
+    .main-title {
+        font-size: 2rem;
+        margin: 2rem 1rem;
+    }
+
+    .home-container {
+        padding: 2rem;
+        height: calc(100vh - 4rem);
+    }
+
     .portfolio-container {
         grid-template-columns: 1fr;
         margin-right: 0;
@@ -318,24 +336,48 @@ nav {
         position: relative;
         height: auto;
         border-right: none;
-        padding: 1rem;
+        padding: 1.5rem 1rem;
+        text-align: center;
     }
 
     .bio {
-        display: none;
+        display: block;
+        margin-bottom: 2rem;
     }
 
     .profile-image {
         width: 80px;
-        margin-bottom: 0;
+        margin-bottom: 1rem;
     }
 
     .portfolio-wrapper {
         height: auto;
         overflow: visible;
+        padding: 1rem;
     }
 
-    .tesla-container,
+    .portfolio-grid {
+        gap: 1rem;
+    }
+
+    .tesla-container {
+        margin-right: 0;
+        padding: 1rem;
+        min-height: calc(100vh - 60px);
+        overflow: hidden;
+    }
+
+    .tesla-content {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        height: 100%;
+    }
+
+    .tesla-stats {
+        gap: 1rem;
+    }
+
     .links-container {
         margin-right: 0;
         padding: 1rem;
