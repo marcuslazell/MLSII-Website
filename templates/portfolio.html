@@ -7,32 +7,30 @@
             <img src="{{ url_for('static', filename='images/profile.jpg') }}" alt="Marcus" class="profile-pic">
         </div>
 
-        <div class="bio">
-            <div class="creator-tagline">Marcus L. S. II - Creator</div>
+        <div class="creator-tagline">Marcus L. S. II - Creator</div>
+
+        <div class="bio desktop-only">
             <p>This is a bio about Marcus</p>
             <p>Marcus is a great photographer</p>
             <p>His work is loved by many</p>
         </div>
     </div>
 
-    <!-- Rest of the portfolio content -->
-</div>
-
-<div class="portfolio-wrapper">
-    <div class="portfolio-grid">
-        {% for item in portfolio_items %}
-        <div class="portfolio-item">
-            {% if item.type == "video" %}
-            <video src="{{ item.url }}" controls preload="metadata">
-                Your browser does not support the video tag.
-            </video>
-            {% else %}
-            <img src="{{ item.url }}?width=800" alt="{{ item.description }}" loading="lazy" width="800" height="1000">
-            {% endif %}
+    <div class="portfolio-wrapper">
+        <div class="portfolio-grid">
+            {% for item in portfolio_items %}
+            <div class="portfolio-item">
+                {% if item.type == "video" %}
+                <video src="{{ item.url }}" controls preload="metadata">
+                    Your browser does not support the video tag.
+                </video>
+                {% else %}
+                <img src="{{ item.url }}?width=800" alt="{{ item.description }}" loading="lazy">
+                {% endif %}
+            </div>
+            {% endfor %}
         </div>
-        {% endfor %}
     </div>
-</div>
 </div>
 
 {% endblock %}
