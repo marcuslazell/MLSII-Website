@@ -5,6 +5,8 @@ from urllib.parse import quote
 from dotenv import load_dotenv
 import teslapy
 import time
+import json
+from datetime import datetime, timedelta
 
 app = Flask(__name__)
 load_dotenv()
@@ -14,19 +16,44 @@ BUNNY_STORAGE_ZONE = os.environ.get('BUNNY_STORAGE_ZONE')
 BUNNY_API_KEY = os.environ.get('BUNNY_ACCESS_KEY')
 BUNNY_PULL_ZONE_URL = os.environ.get('BUNNY_PULL_ZONE_URL')
 TESLA_EMAIL = os.environ.get('TESLA_EMAIL')
-TESLA_PASSWORD = os.environ.get('TESLA_PASSWORD')
-MY_CAR_NAME = "MLSII - Tesla 3"  # Your car's display name
+TESLA_REFRESH_TOKEN = os.environ.get('TESLA_REFRESH_TOKEN')
+MY_CAR_NAME = "MLSII - Tesla 3"
+
+def refresh_tesla_token():
+    """Get a new access token using refresh token."""
+    try:
+        url = "https://auth.tesla.com/oauth2/v3/token"
+        headers = {"Content-Type": "application/json"}
+        data = {
+            "grant_type": "refresh_token",
+            "client_id": "ownerapi",
+            "refresh_token": TESLA_REFRESH_TOKEN,
+            "scope": "openid email offline_access"
+        }
+        
+        response = requests.post(url, headers=headers, json=data)
+        response.raise_for_status()
+        return response.json()['access_token']
+    except Exception as e:
+        print(f"Error refreshing token: {e}")
+        return None
 
 def get_tesla_data():
     """Fetch Tesla vehicle data with improved error handling."""
     try:
-        if not TESLA_EMAIL:
-            print("Tesla email not configured in environment")
+        if not TESLA_EMAIL or not TESLA_REFRESH_TOKEN:
+            print("Tesla credentials not configured in environment")
             return None
 
         print("\nAttempting to connect to Tesla API...")
         tesla = teslapy.Tesla(TESLA_EMAIL)
-        tesla.fetch_token()
+        
+        # Use refresh token flow
+        access_token = refresh_tesla_token()
+        if not access_token:
+            return None
+            
+        tesla.token['access_token'] = access_token
         
         print("Getting vehicle list...")
         vehicles = tesla.vehicle_list()

@@ -26,6 +26,8 @@ nav {
     flex-direction: column;
     align-items: center;
     justify-content: center;
+    z-index: 1000;
+    /* Ensure nav stays on top */
 }
 
 .logo {
@@ -137,7 +139,6 @@ nav {
     justify-content: flex-start;
     align-items: center;
     background: white;
-
 }
 
 .profile-image {
@@ -165,14 +166,19 @@ nav {
     line-height: 1.6;
     max-width: 280px;
     text-align: center;
+    display: none;
+    /* Hide by default */
 }
 
 .bio p {
     margin-bottom: 1rem;
 }
 
-.desktop-only {
-    display: block;
+/* Only show bio on desktop */
+@media (min-width: 769px) {
+    .bio {
+        display: block;
+    }
 }
 
 .portfolio-wrapper {
@@ -223,15 +229,8 @@ nav {
 
 .tesla-content {
     text-align: center;
-}
-
-.tesla-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    margin-right: 320px;
-    overflow: hidden;
+    position: relative;
+    z-index: 1;
 }
 
 .tesla-stats {
@@ -320,10 +319,13 @@ nav {
 /* Responsive Design */
 @media (max-width: 768px) {
     nav {
+        position: fixed;
+        /* Keep nav fixed on mobile */
         width: 100%;
         height: auto;
-        position: relative;
         padding: 1rem;
+        background: white;
+        z-index: 1000;
     }
 
     .main-title {
@@ -340,6 +342,8 @@ nav {
         grid-template-columns: 1fr;
         margin-right: 0;
         height: auto;
+        padding-top: 60px;
+        /* Add space for fixed nav */
     }
 
     .sidebar {
@@ -348,15 +352,6 @@ nav {
         border-right: none;
         padding: 1rem;
         margin-bottom: 0;
-    }
-
-    .desktop-only {
-        display: none;
-    }
-
-    .bio {
-        display: block;
-        margin-bottom: 2rem;
     }
 
     .profile-image {
@@ -379,30 +374,17 @@ nav {
     }
 
     .tesla-container {
-        height: calc(100vh - 60px);
         margin-right: 0;
         padding: 1rem;
-        position: fixed;
-        top: 60px;
-        left: 0;
-        right: 0;
-        bottom: 0;
-    }
-
-    .tesla-content {
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        height: 100%;
-    }
-
-    .tesla-stats {
-        gap: 1rem;
+        padding-top: 60px;
+        /* Add space for fixed nav */
     }
 
     .links-container {
         margin-right: 0;
         padding: 1rem;
+        padding-top: 60px;
+        /* Add space for fixed nav */
     }
 
     .links-grid {
