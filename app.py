@@ -26,6 +26,10 @@ TESLA_EMAIL = os.environ.get('TESLA_EMAIL')
 TESLA_REFRESH_TOKEN = os.environ.get('TESLA_REFRESH_TOKEN')
 MY_CAR_NAME = "MLSII - Tesla 3"
 
+# At the start of get_tesla_data():
+logger.info(f"Environment check - TESLA_EMAIL: {'Set' if TESLA_EMAIL else 'Not Set'}")
+logger.info(f"Environment check - TESLA_REFRESH_TOKEN: {'Set' if TESLA_REFRESH_TOKEN else 'Not Set'}")
+
 # Log environment status at startup
 logger.info("Environment Variables Status:")
 logger.info(f"TESLA_EMAIL length: {len(TESLA_EMAIL) if TESLA_EMAIL else 0}")
