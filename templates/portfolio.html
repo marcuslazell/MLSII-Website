@@ -1,11 +1,10 @@
 {% extends "base.html" %}
 {% block content %}
 
-<div class="photography-container">
-    <!-- Bio section -->
+<div class="portfolio-container">
     <div class="sidebar">
         <div class="profile-image">
-            <img src="{{ url_for('static', filename='images/profile.png') }}" alt="Marcus" class="profile-pic">
+            <img src="{{ url_for('static', filename='images/profile.jpg') }}" alt="Marcus" class="profile-pic">
         </div>
 
         <div class="bio">
@@ -15,7 +14,6 @@
         </div>
     </div>
 
-    <!-- Portfolio section -->
     <div class="portfolio-wrapper">
         <div class="portfolio-grid">
             {% for item in portfolio_items %}
@@ -28,9 +26,6 @@
                 <img src="{{ item.url }}?width=800" alt="{{ item.description }}" loading="lazy" width="800"
                     height="1000">
                 {% endif %}
-                <div class="portfolio-item-overlay">
-                    {{ item.description }}
-                </div>
             </div>
             {% endfor %}
         </div>

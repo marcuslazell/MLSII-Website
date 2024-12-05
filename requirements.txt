@@ -22,3 +22,6 @@ yarl==1.18.0
 requests==2.31.0
 asgiref==3.7.2
 teslapy==2.8.0
+python-jose[cryptography]
+redis
+cachetools

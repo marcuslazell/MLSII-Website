@@ -96,8 +96,29 @@ nav {
     color: #333;
 }
 
-/* Photography Page */
-.photography-container {
+/* Social Links */
+.social-links {
+    position: fixed;
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 2rem;
+}
+
+.social-icon {
+    width: 24px;
+    height: 24px;
+    fill: #666;
+    transition: fill 0.3s ease;
+}
+
+.social-icon:hover {
+    fill: #333;
+}
+
+/* Portfolio Page */
+.portfolio-container {
     display: grid;
     grid-template-columns: 300px 1fr;
     height: 100vh;
@@ -199,14 +220,29 @@ nav {
 .tesla-stats {
     display: flex;
     flex-direction: column;
-    gap: 1rem;
+    gap: 1.5rem;
+    margin-top: 2rem;
 }
 
-.tesla-stats p,
-.tesla-status {
+.battery-container {
+    width: 200px;
+    height: 30px;
+    background-color: #eee;
+    border-radius: 15px;
+    overflow: hidden;
+    margin: 0 auto;
+}
+
+.battery-level {
+    height: 100%;
+    background-color: #4CAF50;
+    transition: width 0.3s ease;
+}
+
+.tesla-label {
     font-size: 1.2rem;
     color: #666;
-    letter-spacing: 1px;
+    margin-bottom: 0.5rem;
 }
 
 /* Links Page */
@@ -273,7 +309,7 @@ nav {
         padding: 1rem;
     }
 
-    .photography-container {
+    .portfolio-container {
         grid-template-columns: 1fr;
         margin-right: 0;
     }
@@ -302,13 +338,17 @@ nav {
     .tesla-container,
     .links-container {
         margin-right: 0;
-    }
-
-    .links-container {
-        padding: 2rem;
+        padding: 1rem;
     }
 
     .links-grid {
         grid-template-columns: 1fr;
+    }
+
+    .social-links {
+        position: static;
+        margin-top: 2rem;
+        transform: none;
+        justify-content: center;
     }
 }

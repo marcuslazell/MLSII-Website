@@ -7,11 +7,25 @@
 
         {% if tesla_data %}
         {% if tesla_data.state == 'online' %}
-        <p>{{ tesla_data.battery_level }}%</p>
-        <p>{{ tesla_data.range }} mi</p>
-        <p>Online</p>
-        {% elif tesla_data.state == 'asleep' %}
-        <p>Vehicle is asleep</p>
+        <div class="tesla-stats">
+            <div>
+                <div class="tesla-label">Battery</div>
+                <div class="battery-container">
+                    <div class="battery-level" style="width: {{ tesla_data.battery_level }}%"></div>
+                </div>
+                <div>{{ tesla_data.battery_level }}%</div>
+            </div>
+
+            <div>
+                <div class="tesla-label">Range</div>
+                <div>{{ tesla_data.range }} mi</div>
+            </div>
+
+            <div>
+                <div class="tesla-label">Status</div>
+                <div>Online</div>
+            </div>
+        </div>
         {% else %}
         <p>Vehicle is {{ tesla_data.state }}</p>
         {% endif %}

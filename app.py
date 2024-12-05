@@ -9,15 +9,21 @@ import time
 app = Flask(__name__)
 load_dotenv()
 
-# Environment variables
-BUNNY_STORAGE_ZONE = os.getenv('BUNNY_STORAGE_ZONE')
-BUNNY_API_KEY = os.getenv('BUNNY_ACCESS_KEY')
-BUNNY_PULL_ZONE_URL = os.getenv('BUNNY_PULL_ZONE_URL')
-TESLA_EMAIL = os.getenv('TESLA_EMAIL')
-MY_CAR_NAME = "MLSII - Tesla 3"  # Add your car's exact display name here
+# Environment variables with fallbacks for better error handling
+BUNNY_STORAGE_ZONE = os.environ.get('BUNNY_STORAGE_ZONE')
+BUNNY_API_KEY = os.environ.get('BUNNY_ACCESS_KEY')
+BUNNY_PULL_ZONE_URL = os.environ.get('BUNNY_PULL_ZONE_URL')
+TESLA_EMAIL = os.environ.get('TESLA_EMAIL')
+TESLA_PASSWORD = os.environ.get('TESLA_PASSWORD')
+MY_CAR_NAME = "MLSII - Tesla 3"  # Your car's display name
 
 def get_tesla_data():
+    """Fetch Tesla vehicle data with improved error handling."""
     try:
+        if not TESLA_EMAIL:
+            print("Tesla email not configured in environment")
+            return None
+
         print("\nAttempting to connect to Tesla API...")
         tesla = teslapy.Tesla(TESLA_EMAIL)
         tesla.fetch_token()
@@ -28,7 +34,7 @@ def get_tesla_data():
             print("No vehicles found")
             return None
 
-        # Find my car by name
+        # Find specific car
         my_car = None
         for v in vehicles:
             print(f"Found vehicle: {v['display_name']}")
@@ -41,25 +47,7 @@ def get_tesla_data():
             return None
 
         current_state = my_car['state']
-        print(f"My car found! State: {current_state}")
-        print(f"Full vehicle data: {my_car}")
-        
-        # Try to wake up the car if it's not online
-        if current_state != 'online':
-            print("Vehicle not online, attempting to wake...")
-            try:
-                my_car.sync_wake_up(timeout=60)  # Increased timeout
-                print("Wake up command sent, checking new state...")
-                # Re-fetch vehicle state
-                vehicles = tesla.vehicle_list()
-                for v in vehicles:
-                    if v['display_name'] == MY_CAR_NAME:
-                        my_car = v
-                        break
-                current_state = my_car['state']
-                print(f"New state after wake attempt: {current_state}")
-            except Exception as e:
-                print(f"Wake up failed: {e}")
+        print(f"Car state: {current_state}")
         
         # If vehicle is online, get detailed data
         if current_state == 'online':
@@ -75,17 +63,20 @@ def get_tesla_data():
                 }
             except Exception as e:
                 print(f"Failed to get vehicle data: {e}")
-                return {'state': 'error'}
+                return {'state': current_state}
         else:
-            print(f"Vehicle still not online, returning state: {current_state}")
             return {'state': current_state}
                 
     except Exception as e:
         print(f"Tesla API Error: {str(e)}")
         return None
 
-# Rest of your code stays the same...
 def get_media_from_bunny():
+    """Fetch media files from BunnyCDN."""
+    if not all([BUNNY_STORAGE_ZONE, BUNNY_API_KEY, BUNNY_PULL_ZONE_URL]):
+        print("Bunny CDN credentials not configured")
+        return []
+
     url = f"https://la.storage.bunnycdn.com/{BUNNY_STORAGE_ZONE}/"
     headers = {"AccessKey": BUNNY_API_KEY}
     
@@ -113,10 +104,10 @@ def get_media_from_bunny():
 def index():
     return render_template('index.html')
 
-@app.route('/photography')
-def photography():
+@app.route('/portfolio')
+def portfolio():
     portfolio_items = get_media_from_bunny()
-    return render_template('photography.html', portfolio_items=portfolio_items)
+    return render_template('portfolio.html', portfolio_items=portfolio_items)
 
 @app.route('/tesla')
 def tesla():
