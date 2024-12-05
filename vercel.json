@@ -23,9 +23,6 @@
     "env": {
         "PYTHONPATH": ".",
         "FLASK_APP": "app.py",
-        "FLASK_ENV": "production",
-        "TESLA_EMAIL": "@tesla_email",
-        "TESLA_REFRESH_TOKEN": "@tesla_refresh_token",
-        "TESLA_PASSWORD": "@tesla_password"
+        "FLASK_ENV": "production"
     }
 }
