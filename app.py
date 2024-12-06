@@ -11,6 +11,7 @@ import logging
 app = Flask(__name__, static_folder='static')
 load_dotenv()
 
+# this comment means nothing
 # Add a small delay to ensure environment variables are loaded
 time.sleep(2)
 
