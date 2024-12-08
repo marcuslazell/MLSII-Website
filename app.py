@@ -1,9 +1,14 @@
 import os
 import requests
+import logging
 from flask import Flask, render_template
 from urllib.parse import quote
 from dotenv import load_dotenv
 import teslapy
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 app = Flask(__name__, static_folder='static')
 load_dotenv()
@@ -19,13 +24,16 @@ MY_CAR_NAME = "MLSII - Tesla 3"
 def get_tesla_data():
     """Fetch Tesla vehicle data using Fleet API."""
     try:
+        logger.info("Starting Tesla API connection...")
+        logger.info(f"Using refresh token starting with: {TESLA_REFRESH_TOKEN[:30]}...")
+        
         with teslapy.Tesla(TESLA_EMAIL, verify=False) as tesla:
-            # Set the base URL to Fleet API
-            tesla.base_url = 'https://fleet-api.prd.na.vn.cloud.tesla.com/api/1'
+            logger.info("Attempting token refresh...")
             tesla.refresh_token = TESLA_REFRESH_TOKEN
-            
-            # Force refresh token and get vehicles
             tesla.fetch_token()
+            logger.info("Token refresh successful")
+            
+            logger.info("Requesting vehicle list...")
             vehicles = tesla.vehicle_list()
             
             # Find specific car
@@ -36,13 +44,14 @@ def get_tesla_data():
                     break
 
             if not my_car:
+                logger.warning("Car not found in vehicle list")
                 return {'state': 'offline'}
 
             current_state = my_car['state']
+            logger.info(f"Vehicle state: {current_state}")
 
             if current_state == 'online':
                 try:
-                    # Using Fleet API endpoint for vehicle data
                     data = my_car.get_vehicle_data()
                     charge_state = data['charge_state']
                     return {
@@ -51,19 +60,47 @@ def get_tesla_data():
                         'range': int(charge_state['battery_range'])
                     }
                 except Exception as e:
-                    print(f"Error fetching vehicle data: {str(e)}")
+                    logger.error(f"Error fetching vehicle data: {str(e)}")
                     return {'state': current_state}
             else:
                 try:
                     my_car.sync_wake_up()
                     return {'state': 'waking_up'}
                 except Exception as e:
-                    print(f"Error waking up vehicle: {str(e)}")
+                    logger.error(f"Error waking up vehicle: {str(e)}")
                     return {'state': current_state}
 
     except Exception as e:
-        print(f"Tesla API Error: {str(e)}")
+        logger.error(f"Tesla API Error: {str(e)}")
         return {'state': 'error'}
+
+def get_media_from_bunny():
+    """Fetch media files from BunnyCDN."""
+    if not all([BUNNY_STORAGE_ZONE, BUNNY_API_KEY, BUNNY_PULL_ZONE_URL]):
+        return []
+
+    url = f"https://la.storage.bunnycdn.com/{BUNNY_STORAGE_ZONE}/"
+    headers = {"AccessKey": BUNNY_API_KEY}
+    
+    try:
+        response = requests.get(url, headers=headers)
+        response.raise_for_status()
+        files = response.json()
+        
+        media = []
+        for file in files:
+            if not file.get('IsDirectory'):
+                file_ext = file['ObjectName'].lower()
+                if any(file_ext.endswith(ext) for ext in ('.jpg', '.jpeg', '.png', '.gif', '.mp4')):
+                    media.append({
+                        "url": f"{BUNNY_PULL_ZONE_URL}/{quote(file['ObjectName'])}",
+                        "description": file['ObjectName'].split('.')[0],
+                        "type": "video" if file_ext.endswith('.mp4') else "image"
+                    })
+        return media
+    except Exception as e:
+        logger.error(f"Error fetching media from BunnyCDN: {str(e)}")
+        return []
 
 @app.route('/')
 def index():
