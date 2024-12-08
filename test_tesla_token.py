@@ -1,28 +1,29 @@
-import requests
 import os
 from dotenv import load_dotenv
+import teslapy
 
 load_dotenv()
 
-TESLA_TOKEN = os.getenv('TESLA_REFRESH_TOKEN')
-
-def test_token():
-    base_url = "https://owner-api.teslamotors.com/api/1"
-    headers = {
-        "Authorization": f"Bearer {TESLA_TOKEN}",
-        "Content-Type": "application/json",
-        "User-Agent": "Mozilla/5.0"
-    }
-
-    print("Testing Tesla API connection...")
-    print(f"Using token: {TESLA_TOKEN[:50]}...")
+def test_tesla_connection():
+    email = os.getenv('TESLA_EMAIL')
+    refresh_token = os.getenv('TESLA_REFRESH_TOKEN')
+    
+    print(f"Testing Tesla API connection...")
+    print(f"Email: {email}")
+    print(f"Refresh token length: {len(refresh_token) if refresh_token else 0}")
     
     try:
-        response = requests.get(f"{base_url}/vehicles", headers=headers)
-        print(f"Status Code: {response.status_code}")
-        print(f"Response: {response.text}")
+        with teslapy.Tesla(email) as tesla:
+            tesla.refresh_token = refresh_token
+            print("\nAttempting to fetch vehicles...")
+            vehicles = tesla.vehicle_list()
+            print(f"\nFound {len(vehicles)} vehicles:")
+            for v in vehicles:
+                print(f"- {v['display_name']}: {v['state']}")
+            return True
     except Exception as e:
-        print(f"Error: {str(e)}")
+        print(f"\nError: {str(e)}")
+        return False
 
 if __name__ == "__main__":
-    test_token()
+    test_tesla_connection()
