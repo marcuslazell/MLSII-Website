@@ -1,11 +1,9 @@
 import os
-import sys
 import requests
 from flask import Flask, render_template
 from urllib.parse import quote
 from dotenv import load_dotenv
 import teslapy
-import logging
 
 app = Flask(__name__, static_folder='static')
 load_dotenv()
@@ -18,49 +16,56 @@ BUNNY_API_KEY = os.environ.get('BUNNY_ACCESS_KEY')
 BUNNY_PULL_ZONE_URL = os.environ.get('BUNNY_PULL_ZONE_URL')
 MY_CAR_NAME = "MLSII - Tesla 3"
 
-if 'VERCEL' in os.environ:
-    sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__))))
-
 def get_tesla_data():
+    """Fetch Tesla vehicle data with simplified token handling."""
     try:
-        tesla = teslapy.Tesla(TESLA_EMAIL)
-        tesla.refresh_token = TESLA_REFRESH_TOKEN
-        
-        vehicles = tesla.vehicle_list()
-        
-        my_car = None
-        for vehicle in vehicles:
-            if vehicle['display_name'] == MY_CAR_NAME:
-                my_car = vehicle
-                break
-
-        if not my_car:
-            return {'state': 'offline'}
-
-        current_state = my_car['state']
-
-        if current_state == 'online':
-            data = my_car.get_vehicle_data()
-            charge_state = data['charge_state']
-            return {
-                'state': 'online',
-                'battery_level': charge_state['battery_level'],
-                'range': int(charge_state['battery_range'])
+        # Initialize Tesla connection with explicit token management
+        with teslapy.Tesla(TESLA_EMAIL) as tesla:
+            # Set refresh token
+            tesla.refresh_token = TESLA_REFRESH_TOKEN
+            
+            # Manually set token data
+            tesla.token = {
+                'refresh_token': TESLA_REFRESH_TOKEN,
+                'token_type': 'Bearer'
             }
-        else:
-            try:
-                my_car.sync_wake_up()
-                return {'state': 'waking_up'}
-            except:
-                return {'state': current_state}
+            
+            # Get vehicles list
+            vehicles = tesla.vehicle_list()
+            
+            # Find target vehicle
+            my_car = None
+            for vehicle in vehicles:
+                if vehicle['display_name'] == MY_CAR_NAME:
+                    my_car = vehicle
+                    break
+
+            if not my_car:
+                return {'state': 'offline'}
+
+            current_state = my_car['state']
+
+            if current_state == 'online':
+                data = my_car.get_vehicle_data()
+                charge_state = data['charge_state']
+                return {
+                    'state': 'online',
+                    'battery_level': charge_state['battery_level'],
+                    'range': int(charge_state['battery_range'])
+                }
+            else:
+                # Try to wake up the vehicle
+                try:
+                    my_car.sync_wake_up()
+                    return {'state': 'waking_up'}
+                except:
+                    return {'state': current_state}
 
     except Exception as e:
         return {'state': 'error'}
-    finally:
-        if 'tesla' in locals():
-            tesla.close()
 
 def get_media_from_bunny():
+    """Fetch media files from BunnyCDN."""
     if not all([BUNNY_STORAGE_ZONE, BUNNY_API_KEY, BUNNY_PULL_ZONE_URL]):
         return []
 
