@@ -42,6 +42,7 @@ def get_tesla_data():
 
             if current_state == 'online':
                 try:
+                    # Using Fleet API endpoint for vehicle data
                     data = my_car.get_vehicle_data()
                     charge_state = data['charge_state']
                     return {
@@ -50,43 +51,19 @@ def get_tesla_data():
                         'range': int(charge_state['battery_range'])
                     }
                 except Exception as e:
+                    print(f"Error fetching vehicle data: {str(e)}")
                     return {'state': current_state}
             else:
                 try:
                     my_car.sync_wake_up()
                     return {'state': 'waking_up'}
-                except:
+                except Exception as e:
+                    print(f"Error waking up vehicle: {str(e)}")
                     return {'state': current_state}
 
     except Exception as e:
+        print(f"Tesla API Error: {str(e)}")
         return {'state': 'error'}
-
-def get_media_from_bunny():
-    """Fetch media files from BunnyCDN."""
-    if not all([BUNNY_STORAGE_ZONE, BUNNY_API_KEY, BUNNY_PULL_ZONE_URL]):
-        return []
-
-    url = f"https://la.storage.bunnycdn.com/{BUNNY_STORAGE_ZONE}/"
-    headers = {"AccessKey": BUNNY_API_KEY}
-    
-    try:
-        response = requests.get(url, headers=headers)
-        response.raise_for_status()
-        files = response.json()
-        
-        media = []
-        for file in files:
-            if not file.get('IsDirectory'):
-                file_ext = file['ObjectName'].lower()
-                if any(file_ext.endswith(ext) for ext in ('.jpg', '.jpeg', '.png', '.gif', '.mp4')):
-                    media.append({
-                        "url": f"{BUNNY_PULL_ZONE_URL}/{quote(file['ObjectName'])}",
-                        "description": file['ObjectName'].split('.')[0],
-                        "type": "video" if file_ext.endswith('.mp4') else "image"
-                    })
-        return media
-    except Exception:
-        return []
 
 @app.route('/')
 def index():
