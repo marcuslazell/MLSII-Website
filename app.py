@@ -17,23 +17,19 @@ BUNNY_PULL_ZONE_URL = os.environ.get('BUNNY_PULL_ZONE_URL')
 MY_CAR_NAME = "MLSII - Tesla 3"
 
 def get_tesla_data():
-    """Fetch Tesla vehicle data with simplified token handling."""
+    """Fetch Tesla vehicle data with improved token handling for Vercel."""
     try:
-        # Initialize Tesla connection with explicit token management
         with teslapy.Tesla(TESLA_EMAIL) as tesla:
-            # Set refresh token
+            # Set the refresh token
             tesla.refresh_token = TESLA_REFRESH_TOKEN
             
-            # Manually set token data
-            tesla.token = {
-                'refresh_token': TESLA_REFRESH_TOKEN,
-                'token_type': 'Bearer'
-            }
+            # Force token refresh
+            tesla.fetch_token()
             
-            # Get vehicles list
+            # Get vehicle list
             vehicles = tesla.vehicle_list()
             
-            # Find target vehicle
+            # Find specific car
             my_car = None
             for vehicle in vehicles:
                 if vehicle['display_name'] == MY_CAR_NAME:
@@ -46,15 +42,17 @@ def get_tesla_data():
             current_state = my_car['state']
 
             if current_state == 'online':
-                data = my_car.get_vehicle_data()
-                charge_state = data['charge_state']
-                return {
-                    'state': 'online',
-                    'battery_level': charge_state['battery_level'],
-                    'range': int(charge_state['battery_range'])
-                }
+                try:
+                    data = my_car.get_vehicle_data()
+                    charge_state = data['charge_state']
+                    return {
+                        'state': 'online',
+                        'battery_level': charge_state['battery_level'],
+                        'range': int(charge_state['battery_range'])
+                    }
+                except Exception as e:
+                    return {'state': current_state}
             else:
-                # Try to wake up the vehicle
                 try:
                     my_car.sync_wake_up()
                     return {'state': 'waking_up'}
