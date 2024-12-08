@@ -4,9 +4,15 @@ from flask import Flask, render_template
 from urllib.parse import quote
 from dotenv import load_dotenv
 import teslapy
+import logging
+import json
 
 app = Flask(__name__, static_folder='static')
 load_dotenv()
+
+# Set up logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger('app')
 
 # Environment variables
 TESLA_EMAIL = os.environ.get('TESLA_EMAIL')
@@ -17,49 +23,67 @@ BUNNY_PULL_ZONE_URL = os.environ.get('BUNNY_PULL_ZONE_URL')
 MY_CAR_NAME = "MLSII - Tesla 3"
 
 def get_tesla_data():
-    """Fetch Tesla vehicle data with improved token handling for Vercel."""
+    """Fetch Tesla vehicle data with detailed error logging."""
     try:
+        logger.info("Starting Tesla API connection...")
+        logger.info(f"Using refresh token starting with: {TESLA_REFRESH_TOKEN[:50]}...")
+        
         with teslapy.Tesla(TESLA_EMAIL) as tesla:
-            # Set the refresh token
-            tesla.refresh_token = TESLA_REFRESH_TOKEN
-            
-            # Force token refresh
-            tesla.fetch_token()
-            
-            # Get vehicle list
-            vehicles = tesla.vehicle_list()
-            
-            # Find specific car
-            my_car = None
-            for vehicle in vehicles:
-                if vehicle['display_name'] == MY_CAR_NAME:
-                    my_car = vehicle
-                    break
+            try:
+                # Set refresh token and force token refresh
+                tesla.refresh_token = TESLA_REFRESH_TOKEN
+                logger.info("Attempting token refresh...")
+                tesla.fetch_token()
+                logger.info("Token refresh successful")
+                
+                # Get vehicles
+                logger.info("Requesting vehicle list...")
+                vehicles = tesla.vehicle_list()
+                logger.info(f"Found {len(vehicles)} vehicles")
+                
+                # Find specific car
+                my_car = None
+                for vehicle in vehicles:
+                    logger.info(f"Checking vehicle: {vehicle['display_name']}")
+                    if vehicle['display_name'] == MY_CAR_NAME:
+                        my_car = vehicle
+                        break
 
-            if not my_car:
-                return {'state': 'offline'}
+                if not my_car:
+                    logger.error(f"Could not find car named {MY_CAR_NAME}")
+                    return {'state': 'offline'}
 
-            current_state = my_car['state']
+                current_state = my_car['state']
+                logger.info(f"Vehicle state: {current_state}")
 
-            if current_state == 'online':
-                try:
-                    data = my_car.get_vehicle_data()
-                    charge_state = data['charge_state']
-                    return {
-                        'state': 'online',
-                        'battery_level': charge_state['battery_level'],
-                        'range': int(charge_state['battery_range'])
-                    }
-                except Exception as e:
-                    return {'state': current_state}
-            else:
-                try:
-                    my_car.sync_wake_up()
-                    return {'state': 'waking_up'}
-                except:
-                    return {'state': current_state}
+                if current_state == 'online':
+                    try:
+                        logger.info("Getting vehicle data...")
+                        data = my_car.get_vehicle_data()
+                        charge_state = data['charge_state']
+                        return {
+                            'state': 'online',
+                            'battery_level': charge_state['battery_level'],
+                            'range': int(charge_state['battery_range'])
+                        }
+                    except Exception as e:
+                        logger.error(f"Error getting vehicle data: {str(e)}")
+                        return {'state': current_state}
+                else:
+                    try:
+                        logger.info("Attempting to wake vehicle...")
+                        my_car.sync_wake_up()
+                        return {'state': 'waking_up'}
+                    except Exception as e:
+                        logger.error(f"Error waking vehicle: {str(e)}")
+                        return {'state': current_state}
+
+            except Exception as e:
+                logger.error(f"Tesla API operation failed: {str(e)}")
+                return {'state': 'error'}
 
     except Exception as e:
+        logger.error(f"Tesla connection failed: {str(e)}")
         return {'state': 'error'}
 
 def get_media_from_bunny():
