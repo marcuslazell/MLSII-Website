@@ -1,4 +1,5 @@
 import os
+import sys
 import requests
 from flask import Flask, render_template
 from urllib.parse import quote
@@ -16,6 +17,9 @@ BUNNY_STORAGE_ZONE = os.environ.get('BUNNY_STORAGE_ZONE')
 BUNNY_API_KEY = os.environ.get('BUNNY_ACCESS_KEY')
 BUNNY_PULL_ZONE_URL = os.environ.get('BUNNY_PULL_ZONE_URL')
 MY_CAR_NAME = "MLSII - Tesla 3"
+
+if 'VERCEL' in os.environ:
+    sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__))))
 
 def get_tesla_data():
     try:
