@@ -13,7 +13,7 @@ body {
     min-height: 100vh;
 }
 
-/* Navigation */
+/* Navigation fix for mobile */
 nav {
     position: fixed;
     right: 0;
@@ -26,6 +26,14 @@ nav {
     flex-direction: column;
     align-items: center;
     justify-content: center;
+    z-index: 100;
+    /* Add this to ensure nav appears above content */
+}
+
+.portfolio-grid {
+    position: relative;
+    z-index: 1;
+    /* Add this to put content behind nav */
 }
 
 .logo {

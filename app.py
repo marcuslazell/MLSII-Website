@@ -107,6 +107,18 @@ def get_media_from_bunny():
     except Exception:
         return []
 
+def get_site_title():
+    domain = request.host.split(':')[0].lower()  # Convert to lowercase
+    if domain.startswith('www.'):
+        domain = domain[4:]  # Remove www.
+    
+    title_mapping = {
+        'saintlazell.com': 'SAINTLAZELL',
+        'marcuslshaw.com': 'MARCUS SHAW',
+        'thesaintmarcus.com': 'THE SAINT MARCUS'
+    }
+    return title_mapping.get(domain, 'THE SAINT MARCUS')
+
 @app.route('/')
 def index():
     title = get_site_title()
