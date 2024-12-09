@@ -13,7 +13,7 @@ body {
     min-height: 100vh;
 }
 
-/* Navigation fix for mobile */
+/* Navigation */
 nav {
     position: fixed;
     right: 0;
@@ -26,14 +26,7 @@ nav {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    z-index: 100;
-    /* Add this to ensure nav appears above content */
-}
-
-.portfolio-grid {
-    position: relative;
-    z-index: 1;
-    /* Add this to put content behind nav */
+    z-index: 1000;
 }
 
 .logo {
@@ -112,6 +105,7 @@ nav {
     transform: translateX(-50%);
     display: flex;
     gap: 2rem;
+    z-index: 10;
 }
 
 .social-icon {
@@ -125,6 +119,49 @@ nav {
     fill: #333;
 }
 
+/* Tesla Page */
+.tesla-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    margin-right: 320px;
+    position: relative;
+    z-index: 1;
+}
+
+.tesla-content {
+    text-align: center;
+}
+
+.tesla-stats {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    margin-top: 2rem;
+}
+
+.battery-container {
+    width: 200px;
+    height: 30px;
+    background-color: #eee;
+    border-radius: 15px;
+    overflow: hidden;
+    margin: 0 auto;
+}
+
+.battery-level {
+    height: 100%;
+    background-color: #4CAF50;
+    transition: width 0.3s ease;
+}
+
+.tesla-label {
+    font-size: 1.2rem;
+    color: #666;
+    margin-bottom: 0.5rem;
+}
+
 /* Portfolio Page */
 .portfolio-container {
     display: grid;
@@ -132,6 +169,8 @@ nav {
     height: 100vh;
     margin-right: 320px;
     overflow: hidden;
+    position: relative;
+    z-index: 1;
 }
 
 .sidebar {
@@ -156,7 +195,6 @@ nav {
 .profile-pic {
     width: 100%;
     height: auto;
-    /* Border removed */
 }
 
 .creator-tagline {
@@ -172,10 +210,6 @@ nav {
     line-height: 1.6;
     max-width: 280px;
     text-align: center;
-}
-
-.bio p {
-    margin-bottom: 1rem;
 }
 
 .portfolio-wrapper {
@@ -215,47 +249,6 @@ nav {
     transform: scale(1.05);
 }
 
-/* Tesla Page */
-.tesla-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh;
-    margin-right: 320px;
-}
-
-.tesla-content {
-    text-align: center;
-}
-
-.tesla-stats {
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
-    margin-top: 2rem;
-}
-
-.battery-container {
-    width: 200px;
-    height: 30px;
-    background-color: #eee;
-    border-radius: 15px;
-    overflow: hidden;
-    margin: 0 auto;
-}
-
-.battery-level {
-    height: 100%;
-    background-color: #4CAF50;
-    transition: width 0.3s ease;
-}
-
-.tesla-label {
-    font-size: 1.2rem;
-    color: #666;
-    margin-bottom: 0.5rem;
-}
-
 /* Links Page */
 .links-container {
     padding: 4rem;
@@ -263,6 +256,8 @@ nav {
     margin: 0 auto;
     margin-right: 320px;
     text-align: center;
+    position: relative;
+    z-index: 1;
 }
 
 .links-title {
@@ -354,10 +349,14 @@ nav {
     transform: translateY(6px);
 }
 
-/* Responsive Design */
+/* Mobile Styles */
 @media (max-width: 768px) {
     .menu-button {
         display: flex;
+    }
+
+    .home-container .menu-button {
+        display: none;
     }
 
     nav {
@@ -433,10 +432,5 @@ nav {
     .links-grid {
         grid-template-columns: 1fr;
         gap: 1.5rem;
-    }
-
-    .social-links {
-        position: static;
-        margin-top: 2rem;
     }
 }
