@@ -23,6 +23,10 @@
             }
         },
         {
+            "src": "/_vercel/speed-insights/(.*)",
+            "dest": "/_vercel/speed-insights/$1"
+        },
+        {
             "src": "/(.*)",
             "dest": "app.py"
         }

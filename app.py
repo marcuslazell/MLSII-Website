@@ -1,13 +1,17 @@
 import os
 import time
 import requests
-from flask import Flask, render_template
+from flask import Flask, render_template, request
 from urllib.parse import quote
 from dotenv import load_dotenv
 import teslapy
 
 app = Flask(__name__, static_folder='static')
+app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
 load_dotenv()
+
+if app.debug:
+    app.config['TEMPLATES_AUTO_RELOAD'] = True
 
 # Environment variables
 TESLA_EMAIL = os.environ.get('TESLA_EMAIL')
@@ -17,19 +21,33 @@ BUNNY_API_KEY = os.environ.get('BUNNY_ACCESS_KEY')
 BUNNY_PULL_ZONE_URL = os.environ.get('BUNNY_PULL_ZONE_URL')
 MY_CAR_NAME = "MLSII - Tesla 3"
 
+def get_site_title():
+    domain = request.host.split(':')[0]
+    title_mapping = {
+        'saintlazell.com': 'SAINTLAZELL',
+        'marcuslshaw.com': 'MARCUS SHAW',
+        'thesaintmarcus.com': 'THESAINTMARCUS'
+    }
+    return title_mapping.get(domain, 'THESAINTMARCUS')
+
+@app.after_request
+def add_header(response):
+    if app.debug:
+        response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
+        response.headers['Pragma'] = 'no-cache'
+        response.headers['Expires'] = '-1'
+    return response
+
 def get_tesla_data():
     """Fetch Tesla vehicle data using Fleet API."""
     try:
         with teslapy.Tesla(TESLA_EMAIL, verify=False) as tesla:
-            # Set the base URL to Fleet API
             tesla.base_url = 'https://fleet-api.prd.na.vn.cloud.tesla.com/api/1'
             tesla.refresh_token = TESLA_REFRESH_TOKEN
             
-            # Force refresh token and get vehicles
             tesla.fetch_token()
             vehicles = tesla.vehicle_list()
             
-            # Find specific car
             my_car = None
             for vehicle in vehicles:
                 if vehicle['display_name'] == MY_CAR_NAME:
@@ -91,21 +109,25 @@ def get_media_from_bunny():
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    title = get_site_title()
+    return render_template('index.html', title=title)
 
 @app.route('/tesla')
 def tesla():
+    title = get_site_title()
     tesla_data = get_tesla_data()
-    return render_template('tesla.html', tesla_data=tesla_data)
+    return render_template('tesla.html', tesla_data=tesla_data, title=title)
 
 @app.route('/portfolio')
 def portfolio():
+    title = get_site_title()
     portfolio_items = get_media_from_bunny()
-    return render_template('portfolio.html', portfolio_items=portfolio_items)
+    return render_template('portfolio.html', portfolio_items=portfolio_items, title=title)
 
 @app.route('/links')
 def links():
-    return render_template('links.html')
+    title = get_site_title()
+    return render_template('links.html', title=title)
 
 if __name__ == '__main__':
     app.run(debug=True)
