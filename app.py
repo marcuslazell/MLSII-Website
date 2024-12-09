@@ -1,4 +1,5 @@
 import os
+import time
 import requests
 from flask import Flask, render_template
 from urllib.parse import quote
@@ -17,32 +18,48 @@ BUNNY_PULL_ZONE_URL = os.environ.get('BUNNY_PULL_ZONE_URL')
 MY_CAR_NAME = "MLSII - Tesla 3"
 
 def get_tesla_data():
+    """Fetch Tesla vehicle data using Fleet API."""
     try:
-        with teslapy.Tesla(TESLA_EMAIL) as tesla:
-            tesla.token = {
-                'refresh_token': TESLA_REFRESH_TOKEN,
-                'token_type': 'Bearer'
-            }
+        with teslapy.Tesla(TESLA_EMAIL, verify=False) as tesla:
+            # Set the base URL to Fleet API
+            tesla.base_url = 'https://fleet-api.prd.na.vn.cloud.tesla.com/api/1'
+            tesla.refresh_token = TESLA_REFRESH_TOKEN
+            
+            # Force refresh token and get vehicles
             tesla.fetch_token()
             vehicles = tesla.vehicle_list()
             
-            my_car = next((v for v in vehicles if v['display_name'] == MY_CAR_NAME), None)
+            # Find specific car
+            my_car = None
+            for vehicle in vehicles:
+                if vehicle['display_name'] == MY_CAR_NAME:
+                    my_car = vehicle
+                    break
+
             if not my_car:
                 return {'state': 'offline'}
 
-            if my_car['state'] == 'online':
-                data = my_car.get_vehicle_data()
-                charge_state = data['charge_state']
-                return {
-                    'state': 'online',
-                    'battery_level': charge_state['battery_level'],
-                    'range': int(charge_state['battery_range'])
-                }
+            current_state = my_car['state']
+
+            if current_state == 'online':
+                try:
+                    data = my_car.get_vehicle_data()
+                    charge_state = data['charge_state']
+                    return {
+                        'state': 'online',
+                        'battery_level': charge_state['battery_level'],
+                        'range': int(charge_state['battery_range'])
+                    }
+                except Exception as e:
+                    return {'state': current_state}
             else:
-                return {'state': my_car['state']}
+                try:
+                    my_car.sync_wake_up()
+                    return {'state': 'waking_up'}
+                except:
+                    return {'state': current_state}
 
     except Exception as e:
-        print(f"Tesla API Error: {str(e)}")
         return {'state': 'error'}
 
 def get_media_from_bunny():
