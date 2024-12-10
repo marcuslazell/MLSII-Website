@@ -6,17 +6,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ title }}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
-    {% if not config.get('DEBUG', False) %}
-    <script>
-        window.si = window.si || function () { (window.siq = window.siq || []).push(arguments) };
-    </script>
-    <script defer src="/_vercel/speed-insights/script.js"></script>
-    {% endif %}
 </head>
 
 <body>
-    {% if request.endpoint != 'index' %}
-    <a href="{{ url_for('index') }}" class="logo">{{ title }}</a>
+    <header class="header">
+        <a href="{{ url_for('index') }}" class="site-title">{{ title }}</a>
+    </header>
+
+    <div class="menu-button">
+        <span></span>
+    </div>
+
     <nav>
         <div class="nav-links">
             <a href="{{ url_for('index') }}">{{ title }}</a>
@@ -26,7 +26,6 @@
             <a href="{{ url_for('links') }}">LINK IN BIO</a>
         </div>
     </nav>
-    {% endif %}
 
     {% block content %}{% endblock %}
 
@@ -45,6 +44,12 @@
         </a>
     </div>
 
+    {% if not config.get('DEBUG', False) %}
+    <script>
+        window.si = window.si || function () { (window.siq = window.siq || []).push(arguments) };
+    </script>
+    <script defer src="/_vercel/speed-insights/script.js"></script>
+    {% endif %}
     <script src="{{ url_for('static', filename='js/menu.js') }}"></script>
 </body>
 
