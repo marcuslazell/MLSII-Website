@@ -41,10 +41,10 @@ body {
     right: 20px;
     width: 40px;
     height: 40px;
-    background: rgba(0, 0, 0, 0.8);
+    background: white;
     border-radius: 8px;
     z-index: 2001;
-    display: flex;
+    display: none;
     align-items: center;
     justify-content: center;
     cursor: pointer;
@@ -54,7 +54,7 @@ body {
     display: block;
     width: 20px;
     height: 2px;
-    background: white;
+    background: black;
     position: relative;
     transition: all 0.3s ease;
 }
@@ -65,7 +65,7 @@ body {
     position: absolute;
     width: 100%;
     height: 100%;
-    background: white;
+    background: black;
     transition: all 0.3s ease;
 }
 
@@ -87,6 +87,10 @@ body {
 
 .menu-button.active span::after {
     transform: rotate(-45deg);
+}
+
+body:not(.index-page) .menu-button {
+    display: flex;
 }
 
 nav {
@@ -126,6 +130,28 @@ nav.active {
     color: #333;
 }
 
+/* Social Links */
+.social-links {
+    position: fixed;
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 2rem;
+    z-index: 10;
+}
+
+.social-icon {
+    width: 24px;
+    height: 24px;
+    fill: #666;
+    transition: fill 0.3s ease;
+}
+
+.social-icon:hover {
+    fill: #333;
+}
+
 /* Home Page */
 .home-container {
     min-height: 100vh;
@@ -134,7 +160,7 @@ nav.active {
     justify-content: center;
     align-items: center;
     gap: 4rem;
-    padding-top: 80px;
+    padding-top: 0;
 }
 
 .main-title {
@@ -161,71 +187,6 @@ nav.active {
 
 .home-links a:hover {
     color: #333;
-}
-
-/* Social Links */
-.social-links {
-    position: fixed;
-    bottom: 2rem;
-    left: 50%;
-    transform: translateX(-50%);
-    display: flex;
-    gap: 2rem;
-    z-index: 10;
-}
-
-.social-icon {
-    width: 24px;
-    height: 24px;
-    fill: #666;
-    transition: fill 0.3s ease;
-}
-
-.social-icon:hover {
-    fill: #333;
-}
-
-/* Tesla Page */
-.tesla-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh;
-    padding-top: 80px;
-    position: relative;
-    z-index: 1;
-}
-
-.tesla-content {
-    text-align: center;
-}
-
-.tesla-stats {
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
-    margin-top: 2rem;
-}
-
-.battery-container {
-    width: 200px;
-    height: 30px;
-    background-color: #eee;
-    border-radius: 15px;
-    overflow: hidden;
-    margin: 0 auto;
-}
-
-.battery-level {
-    height: 100%;
-    background-color: #4CAF50;
-    transition: width 0.3s ease;
-}
-
-.tesla-label {
-    font-size: 1.2rem;
-    color: #666;
-    margin-bottom: 0.5rem;
 }
 
 /* Portfolio Page */
@@ -314,12 +275,54 @@ nav.active {
     transform: scale(1.05);
 }
 
+/* Tesla Page */
+.tesla-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding-top: 80px;
+    position: relative;
+    z-index: 1;
+}
+
+.tesla-content {
+    text-align: center;
+}
+
+.tesla-stats {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    margin-top: 2rem;
+}
+
+.battery-container {
+    width: 200px;
+    height: 30px;
+    background-color: #eee;
+    border-radius: 15px;
+    overflow: hidden;
+    margin: 0 auto;
+}
+
+.battery-level {
+    height: 100%;
+    background-color: #4CAF50;
+    transition: width 0.3s ease;
+}
+
+.tesla-label {
+    font-size: 1.2rem;
+    color: #666;
+    margin-bottom: 0.5rem;
+}
+
 /* Links Page */
 .links-container {
-    padding: 4rem;
+    padding: 5rem 4rem 4rem;
     max-width: 1200px;
     margin: 0 auto;
-    padding-top: 80px;
     text-align: center;
     position: relative;
     z-index: 1;
@@ -331,6 +334,7 @@ nav.active {
     color: #666;
     letter-spacing: 2px;
     margin-bottom: 4rem;
+    padding-top: 2rem;
 }
 
 .links-grid {
@@ -409,7 +413,7 @@ nav.active {
     }
 
     .links-container {
-        padding: 2rem 1rem;
+        padding: 7rem 1rem 2rem;
     }
 
     .links-grid {
@@ -420,5 +424,10 @@ nav.active {
     nav {
         width: 100%;
         max-width: 100%;
+    }
+
+    .menu-button {
+        top: 15px;
+        right: 15px;
     }
 }
