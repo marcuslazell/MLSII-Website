@@ -25,3 +25,7 @@ teslapy==2.8.0
 python-jose[cryptography]
 redis
 cachetools
+tesla-fleet-api==0.3.0
+certifi>=2023.7.22
+charset-normalizer>=3.3.2
+urllib3>=2.0.7
