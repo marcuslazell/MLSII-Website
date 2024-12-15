@@ -41,44 +41,70 @@ def add_header(response):
 def get_tesla_data():
     """Fetch Tesla vehicle data using Fleet API."""
     try:
-        with teslapy.Tesla(TESLA_EMAIL, verify=False) as tesla:
-            tesla.base_url = 'https://fleet-api.prd.na.vn.cloud.tesla.com/api/1'
+        print("Attempting to connect to Tesla API...")  # Debug log
+        with teslapy.Tesla(TESLA_EMAIL) as tesla:
+            print("Setting refresh token...")
             tesla.refresh_token = TESLA_REFRESH_TOKEN
+            tesla.base_url = 'https://fleet-api.prd.na.vn.cloud.tesla.com/api/1'
             
-            tesla.fetch_token()
-            vehicles = tesla.vehicle_list()
+            try:
+                print("Fetching token...")
+                tesla.fetch_token()
+            except Exception as token_error:
+                print(f"Token error: {str(token_error)}")
+                return {'state': 'error', 'error': 'Authentication failed'}
+            
+            try:
+                print("Getting vehicle list...")
+                vehicles = tesla.vehicle_list()
+                print(f"Found {len(vehicles)} vehicles")
+            except Exception as vehicle_error:
+                print(f"Vehicle list error: {str(vehicle_error)}")
+                return {'state': 'error', 'error': 'Could not fetch vehicles'}
             
             my_car = None
             for vehicle in vehicles:
+                print(f"Vehicle found: {vehicle['display_name']}")  # Debug log
                 if vehicle['display_name'] == MY_CAR_NAME:
                     my_car = vehicle
                     break
 
             if not my_car:
+                print("Car not found in vehicle list")  # Debug log
                 return {'state': 'offline'}
 
             current_state = my_car['state']
+            print(f"Car state: {current_state}")  # Debug log
 
             if current_state == 'online':
                 try:
+                    print("Car is online, fetching vehicle data...")
                     data = my_car.get_vehicle_data()
                     charge_state = data['charge_state']
+                    battery_level = charge_state['battery_level']
+                    range_value = int(charge_state['battery_range'])
+                    print(f"Battery Level: {battery_level}%")
+                    print(f"Range: {range_value} mi")
                     return {
                         'state': 'online',
-                        'battery_level': charge_state['battery_level'],
-                        'range': int(charge_state['battery_range'])
+                        'battery_level': battery_level,
+                        'range': range_value
                     }
                 except Exception as e:
+                    print(f"Error getting vehicle data: {str(e)}")  # Debug log
                     return {'state': current_state}
             else:
                 try:
+                    print("Car is not online, attempting to wake it...")  # Debug log
                     my_car.sync_wake_up()
                     return {'state': 'waking_up'}
-                except:
+                except Exception as e:
+                    print(f"Error waking up vehicle: {str(e)}")  # Debug log
                     return {'state': current_state}
 
     except Exception as e:
-        return {'state': 'error'}
+        print(f"Tesla API Error: {str(e)}")  # Debug log
+        return {'state': 'error', 'error': str(e)}
 
 def get_media_from_bunny():
     """Fetch media files from BunnyCDN."""

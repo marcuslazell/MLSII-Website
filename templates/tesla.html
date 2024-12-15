@@ -4,29 +4,44 @@
     <div class="tesla-content">
         <h1>PROJECT TESLA</h1>
         {% if tesla_data %}
-        {% if tesla_data.state == 'online' %}
         <div class="tesla-stats">
             <div>
                 <div class="tesla-label">Battery</div>
                 <div class="battery-container">
+                    {% if tesla_data.battery_level is defined %}
                     <div class="battery-level" style="width: {{ tesla_data.battery_level }}%"></div>
+                    {% endif %}
                 </div>
-                <div>{{ tesla_data.battery_level }}%</div>
+                <div>
+                    {% if tesla_data.battery_level is defined %}
+                    {{ tesla_data.battery_level }}%
+                    {% else %}
+                    --
+                    {% endif %}
+                </div>
             </div>
             <div>
                 <div class="tesla-label">Range</div>
-                <div>{{ tesla_data.range }} mi</div>
+                <div>
+                    {% if tesla_data.range is defined %}
+                    {{ tesla_data.range }} mi
+                    {% else %}
+                    -- mi
+                    {% endif %}
+                </div>
             </div>
             <div>
                 <div class="tesla-label">Status</div>
-                <div>Online</div>
+                <div>{{ tesla_data.state|title }}</div>
             </div>
         </div>
         {% else %}
-        <h2>Project Coming Soon</h2>
-        {% endif %}
-        {% else %}
-        <h2>Project Coming Soon</h2>
+        <div class="tesla-stats">
+            <div class="tesla-label">Error fetching Tesla data</div>
+            {% if tesla_data.error is defined %}
+            <div class="tesla-error">{{ tesla_data.error }}</div>
+            {% endif %}
+        </div>
         {% endif %}
     </div>
 </div>
