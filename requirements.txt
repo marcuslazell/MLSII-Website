@@ -17,7 +17,7 @@ packaging==24.2
 propcache==0.2.0
 python-dotenv==1.0.1
 tesla-api==2.0.1
-Werkzeug==3.0.1
+Werkzeug==3.0.6
 yarl==1.18.0
 requests==2.32.0
 asgiref==3.7.2
