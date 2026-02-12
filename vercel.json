@@ -16,6 +16,13 @@
     ],
     "routes": [
         {
+            "src": "/\\.well-known/appspecific/com\\.tesla\\.3p\\.public-key\\.pem",
+            "dest": "/static/tesla/com.tesla.3p.public-key.pem",
+            "headers": {
+                "content-type": "application/x-pem-file"
+            }
+        },
+        {
             "src": "/static/(.*)",
             "dest": "/static/$1",
             "headers": {

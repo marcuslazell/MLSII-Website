@@ -1,12 +1,12 @@
 import os
 import requests
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, send_from_directory
 from urllib.parse import quote
 from dotenv import load_dotenv
 
 app = Flask(__name__, static_folder='static')
 app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
-load_dotenv()
+load_dotenv(interpolate=False)
 
 if app.debug:
     app.config['TEMPLATES_AUTO_RELOAD'] = True
@@ -163,6 +163,14 @@ def portfolio():
 def links():
     title = get_site_title()
     return render_template('links.html', title=title)
+
+@app.route('/.well-known/appspecific/com.tesla.3p.public-key.pem')
+def tesla_partner_public_key():
+    return send_from_directory(
+        os.path.join(app.root_path, 'static', 'tesla'),
+        'com.tesla.3p.public-key.pem',
+        mimetype='application/x-pem-file'
+    )
 
 if __name__ == '__main__':
     app.run(debug=True)
