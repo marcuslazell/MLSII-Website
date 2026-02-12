@@ -10,6 +10,9 @@ app = Flask(__name__, static_folder='static')
 app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
 load_dotenv()
 
+# Tesla endpoints now require Fleet API host instead of owner-api.
+teslapy.BASE_URL = 'https://fleet-api.prd.na.vn.cloud.tesla.com/'
+
 if app.debug:
     app.config['TEMPLATES_AUTO_RELOAD'] = True
 
@@ -21,31 +24,34 @@ BUNNY_API_KEY = os.environ.get('BUNNY_ACCESS_KEY')
 BUNNY_PULL_ZONE_URL = os.environ.get('BUNNY_PULL_ZONE_URL')
 MY_CAR_NAME = "MLSII - Tesla 3"
 
-def get_site_title():
-    domain = request.host.split(':')[0]
-    title_mapping = {
-        'saintlazell.com': 'SAINTLAZELL',
-        'marcuslshaw.com': 'MARCUS SHAW',
-        'thesaintmarcus.com': 'THESAINTMARCUS'
-    }
-    return title_mapping.get(domain, 'THESAINTMARCUS')
-
 @app.after_request
 def add_header(response):
     if app.debug:
         response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
         response.headers['Pragma'] = 'no-cache'
         response.headers['Expires'] = '-1'
+
+    response.headers.setdefault('X-Content-Type-Options', 'nosniff')
+    response.headers.setdefault('X-Frame-Options', 'SAMEORIGIN')
+    response.headers.setdefault('Referrer-Policy', 'strict-origin-when-cross-origin')
+    response.headers.setdefault('Permissions-Policy', 'geolocation=(), microphone=(), camera=()')
+    if request.is_secure:
+        response.headers.setdefault('Strict-Transport-Security', 'max-age=31536000; includeSubDomains')
     return response
 
 def get_tesla_data():
     """Fetch Tesla vehicle data using Fleet API."""
+    if not TESLA_EMAIL or not TESLA_REFRESH_TOKEN:
+        return {'state': 'error', 'error': 'Tesla credentials are not configured'}
+
     try:
         print("Attempting to connect to Tesla API...")  # Debug log
         with teslapy.Tesla(TESLA_EMAIL) as tesla:
             print("Setting refresh token...")
-            tesla.refresh_token = TESLA_REFRESH_TOKEN
-            tesla.base_url = 'https://fleet-api.prd.na.vn.cloud.tesla.com/api/1'
+            tesla.token = {
+                'refresh_token': TESLA_REFRESH_TOKEN,
+                'token_type': 'Bearer'
+            }
             
             try:
                 print("Fetching token...")
@@ -61,6 +67,9 @@ def get_tesla_data():
             except Exception as vehicle_error:
                 print(f"Vehicle list error: {str(vehicle_error)}")
                 return {'state': 'error', 'error': 'Could not fetch vehicles'}
+
+            if not vehicles:
+                return {'state': 'error', 'error': 'No vehicles found'}
             
             my_car = None
             for vehicle in vehicles:
@@ -70,8 +79,8 @@ def get_tesla_data():
                     break
 
             if not my_car:
-                print("Car not found in vehicle list")  # Debug log
-                return {'state': 'offline'}
+                print("Configured car not found, using first vehicle")  # Debug log
+                my_car = vehicles[0]
 
             current_state = my_car['state']
             print(f"Car state: {current_state}")  # Debug log
@@ -80,9 +89,10 @@ def get_tesla_data():
                 try:
                     print("Car is online, fetching vehicle data...")
                     data = my_car.get_vehicle_data()
-                    charge_state = data['charge_state']
-                    battery_level = charge_state['battery_level']
-                    range_value = int(charge_state['battery_range'])
+                    charge_state = data.get('charge_state', {})
+                    battery_level = charge_state.get('battery_level')
+                    range_value = charge_state.get('battery_range')
+                    range_value = int(range_value) if range_value is not None else None
                     print(f"Battery Level: {battery_level}%")
                     print(f"Range: {range_value} mi")
                     return {

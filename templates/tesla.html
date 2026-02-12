@@ -3,45 +3,59 @@
 <div class="tesla-container">
     <div class="tesla-content">
         <h1>PROJECT TESLA</h1>
-        {% if tesla_data %}
-        <div class="tesla-stats">
-            <div>
-                <div class="tesla-label">Battery</div>
-                <div class="battery-container">
-                    {% if tesla_data.battery_level is defined %}
-                    <div class="battery-level" style="width: {{ tesla_data.battery_level }}%"></div>
-                    {% endif %}
+        {% set state = tesla_data.state if tesla_data and tesla_data.state is defined else 'error' %}
+
+        {% if state == 'online' %}
+            <div class="tesla-stats">
+                <div>
+                    <div class="tesla-label">Battery</div>
+                    <div class="battery-container">
+                        {% if tesla_data.battery_level is defined and tesla_data.battery_level is not none %}
+                        <div class="battery-level" style="width: {{ tesla_data.battery_level }}%"></div>
+                        {% endif %}
+                    </div>
+                    <div>
+                        {% if tesla_data.battery_level is defined and tesla_data.battery_level is not none %}
+                        {{ tesla_data.battery_level }}%
+                        {% else %}
+                        --
+                        {% endif %}
+                    </div>
                 </div>
                 <div>
-                    {% if tesla_data.battery_level is defined %}
-                    {{ tesla_data.battery_level }}%
-                    {% else %}
-                    --
-                    {% endif %}
+                    <div class="tesla-label">Range</div>
+                    <div>
+                        {% if tesla_data.range is defined and tesla_data.range is not none %}
+                        {{ tesla_data.range }} mi
+                        {% else %}
+                        -- mi
+                        {% endif %}
+                    </div>
                 </div>
-            </div>
-            <div>
-                <div class="tesla-label">Range</div>
                 <div>
-                    {% if tesla_data.range is defined %}
-                    {{ tesla_data.range }} mi
-                    {% else %}
-                    -- mi
-                    {% endif %}
+                    <div class="tesla-label">Status</div>
+                    <div>{{ state|replace('_', ' ')|title }}</div>
                 </div>
             </div>
-            <div>
-                <div class="tesla-label">Status</div>
-                <div>{{ tesla_data.state|title }}</div>
+        {% elif state in ['offline', 'asleep', 'waking_up'] %}
+            <div class="tesla-stats">
+                <div>
+                    <div class="tesla-label">Status</div>
+                    <div>{{ state|replace('_', ' ')|title }}</div>
+                </div>
+                <div>Vehicle data is temporarily unavailable.</div>
             </div>
-        </div>
         {% else %}
-        <div class="tesla-stats">
-            <div class="tesla-label">Error fetching Tesla data</div>
-            {% if tesla_data.error is defined %}
-            <div class="tesla-error">{{ tesla_data.error }}</div>
-            {% endif %}
-        </div>
+            <div class="tesla-stats">
+                <div class="tesla-label">Error fetching Tesla data</div>
+                <div class="tesla-error">
+                    {% if tesla_data and tesla_data.error is defined %}
+                    {{ tesla_data.error }}
+                    {% else %}
+                    Please try again later.
+                    {% endif %}
+                </div>
+            </div>
         {% endif %}
     </div>
 </div>
