@@ -1,24 +1,21 @@
 import os
-import time
 import requests
-from flask import Flask, render_template, request, url_for
+from flask import Flask, render_template, request
 from urllib.parse import quote
 from dotenv import load_dotenv
-import teslapy
 
 app = Flask(__name__, static_folder='static')
 app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
 load_dotenv()
 
-# Tesla endpoints now require Fleet API host instead of owner-api.
-teslapy.BASE_URL = 'https://fleet-api.prd.na.vn.cloud.tesla.com/'
-
 if app.debug:
     app.config['TEMPLATES_AUTO_RELOAD'] = True
 
 # Environment variables
-TESLA_EMAIL = os.environ.get('TESLA_EMAIL')
+TESLA_CLIENT_ID = os.environ.get('TESLA_CLIENT_ID')
+TESLA_CLIENT_SECRET = os.environ.get('TESLA_CLIENT_SECRET')
 TESLA_REFRESH_TOKEN = os.environ.get('TESLA_REFRESH_TOKEN')
+TESLA_FLEET_BASE_URL = os.environ.get('TESLA_FLEET_BASE_URL', 'https://fleet-api.prd.na.vn.cloud.tesla.com')
 BUNNY_STORAGE_ZONE = os.environ.get('BUNNY_STORAGE_ZONE')
 BUNNY_API_KEY = os.environ.get('BUNNY_ACCESS_KEY')
 BUNNY_PULL_ZONE_URL = os.environ.get('BUNNY_PULL_ZONE_URL')
@@ -40,81 +37,71 @@ def add_header(response):
     return response
 
 def get_tesla_data():
-    """Fetch Tesla vehicle data using Fleet API."""
-    if not TESLA_EMAIL or not TESLA_REFRESH_TOKEN:
-        return {'state': 'error', 'error': 'Tesla credentials are not configured'}
+    """Fetch Tesla vehicle status data from Fleet API using read-only requests."""
+    if not TESLA_CLIENT_ID or not TESLA_REFRESH_TOKEN:
+        return {'state': 'error', 'error': 'Tesla Fleet credentials are not configured'}
 
     try:
-        print("Attempting to connect to Tesla API...")  # Debug log
-        with teslapy.Tesla(TESLA_EMAIL) as tesla:
-            print("Setting refresh token...")
-            tesla.token = {
-                'refresh_token': TESLA_REFRESH_TOKEN,
-                'token_type': 'Bearer'
-            }
-            
-            try:
-                print("Fetching token...")
-                tesla.fetch_token()
-            except Exception as token_error:
-                print(f"Token error: {str(token_error)}")
-                return {'state': 'error', 'error': 'Authentication failed'}
-            
-            try:
-                print("Getting vehicle list...")
-                vehicles = tesla.vehicle_list()
-                print(f"Found {len(vehicles)} vehicles")
-            except Exception as vehicle_error:
-                print(f"Vehicle list error: {str(vehicle_error)}")
-                return {'state': 'error', 'error': 'Could not fetch vehicles'}
+        token_payload = {
+            'grant_type': 'refresh_token',
+            'client_id': TESLA_CLIENT_ID,
+            'refresh_token': TESLA_REFRESH_TOKEN
+        }
+        if TESLA_CLIENT_SECRET:
+            token_payload['client_secret'] = TESLA_CLIENT_SECRET
 
-            if not vehicles:
-                return {'state': 'error', 'error': 'No vehicles found'}
-            
-            my_car = None
-            for vehicle in vehicles:
-                print(f"Vehicle found: {vehicle['display_name']}")  # Debug log
-                if vehicle['display_name'] == MY_CAR_NAME:
-                    my_car = vehicle
-                    break
+        token_response = requests.post(
+            'https://auth.tesla.com/oauth2/v3/token',
+            data=token_payload,
+            timeout=10
+        )
+        token_response.raise_for_status()
+        access_token = token_response.json().get('access_token')
+        if not access_token:
+            return {'state': 'error', 'error': 'Authentication failed'}
 
-            if not my_car:
-                print("Configured car not found, using first vehicle")  # Debug log
-                my_car = vehicles[0]
+        headers = {'Authorization': f'Bearer {access_token}'}
 
-            current_state = my_car['state']
-            print(f"Car state: {current_state}")  # Debug log
+        vehicles_response = requests.get(
+            f'{TESLA_FLEET_BASE_URL}/api/1/vehicles',
+            headers=headers,
+            timeout=10
+        )
+        vehicles_response.raise_for_status()
+        vehicles = vehicles_response.json().get('response', [])
+        if not vehicles:
+            return {'state': 'error', 'error': 'No vehicles found'}
 
-            if current_state == 'online':
-                try:
-                    print("Car is online, fetching vehicle data...")
-                    data = my_car.get_vehicle_data()
-                    charge_state = data.get('charge_state', {})
-                    battery_level = charge_state.get('battery_level')
-                    range_value = charge_state.get('battery_range')
-                    range_value = int(range_value) if range_value is not None else None
-                    print(f"Battery Level: {battery_level}%")
-                    print(f"Range: {range_value} mi")
-                    return {
-                        'state': 'online',
-                        'battery_level': battery_level,
-                        'range': range_value
-                    }
-                except Exception as e:
-                    print(f"Error getting vehicle data: {str(e)}")  # Debug log
-                    return {'state': current_state}
-            else:
-                try:
-                    print("Car is not online, attempting to wake it...")  # Debug log
-                    my_car.sync_wake_up()
-                    return {'state': 'waking_up'}
-                except Exception as e:
-                    print(f"Error waking up vehicle: {str(e)}")  # Debug log
-                    return {'state': current_state}
+        my_car = next((v for v in vehicles if v.get('display_name') == MY_CAR_NAME), vehicles[0])
+        state = my_car.get('state', 'unknown')
+        vehicle_tag = my_car.get('id_s') or my_car.get('vehicle_id') or my_car.get('id')
 
-    except Exception as e:
-        print(f"Tesla API Error: {str(e)}")  # Debug log
-        return {'state': 'error', 'error': str(e)}
+        battery_level = None
+        range_value = None
+
+        # Read-only request for telemetry; no wake or control commands.
+        if vehicle_tag:
+            vehicle_data_response = requests.get(
+                f'{TESLA_FLEET_BASE_URL}/api/1/vehicles/{vehicle_tag}/vehicle_data',
+                params={'endpoints': 'charge_state;vehicle_state'},
+                headers=headers,
+                timeout=10
+            )
+            if vehicle_data_response.ok:
+                vehicle_data = vehicle_data_response.json().get('response', {})
+                charge_state = vehicle_data.get('charge_state', {})
+                battery_level = charge_state.get('battery_level')
+                range_raw = charge_state.get('battery_range')
+                range_value = int(range_raw) if range_raw is not None else None
+
+        return {
+            'state': state,
+            'battery_level': battery_level,
+            'range': range_value
+        }
+
+    except requests.RequestException:
+        return {'state': 'error', 'error': 'Could not fetch Tesla data'}
 
 def get_media_from_bunny():
     """Fetch media files from BunnyCDN."""
