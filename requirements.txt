@@ -16,15 +16,12 @@ multidict==6.1.0
 packaging==24.2
 propcache==0.2.0
 python-dotenv==1.0.1
-tesla-api==2.0.1
 Werkzeug==3.1.5
 yarl==1.18.0
 requests==2.32.4
 asgiref==3.7.2
-teslapy==2.8.0
 redis
 cachetools
-tesla-fleet-api==0.3.0
 certifi>=2023.7.22
 charset-normalizer>=3.3.2
 urllib3>=2.0.7

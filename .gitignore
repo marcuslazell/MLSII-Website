@@ -40,8 +40,5 @@ ENV/
 .DS_Store
 Thumbs.db
 
-# Tesla API tokens
-tesla_tokens.json
-
 # Vercel
 .vercel

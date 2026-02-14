@@ -296,49 +296,6 @@ nav.active {
     transform: scale(1.05);
 }
 
-/* Tesla Page */
-.tesla-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh;
-    padding-top: 80px;
-    position: relative;
-    z-index: 1;
-}
-
-.tesla-content {
-    text-align: center;
-}
-
-.tesla-stats {
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
-    margin-top: 2rem;
-}
-
-.battery-container {
-    width: 200px;
-    height: 30px;
-    background-color: #eee;
-    border-radius: 15px;
-    overflow: hidden;
-    margin: 0 auto;
-}
-
-.battery-level {
-    height: 100%;
-    background-color: #4CAF50;
-    transition: width 0.3s ease;
-}
-
-.tesla-label {
-    font-size: 1.2rem;
-    color: #666;
-    margin-bottom: 0.5rem;
-}
-
 /* Links Page */
 .links-container {
     padding: 5rem 4rem 4rem;
@@ -360,9 +317,9 @@ nav.active {
 
 .links-grid {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
     gap: 2rem;
-    max-width: 900px;
+    max-width: 720px;
     margin: 0 auto;
 }
 
