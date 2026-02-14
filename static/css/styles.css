@@ -375,6 +375,89 @@ nav.active {
     text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
 }
 
+/* Privacy Policy Page */
+.privacy-policy-container {
+    padding: 8rem 1.5rem 8rem;
+    min-height: 100vh;
+    position: relative;
+    z-index: 1;
+}
+
+.privacy-policy-card {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 3rem;
+    border: 1px solid #e8e8e8;
+    border-radius: 16px;
+    background: #fff;
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.04);
+    line-height: 1.7;
+    letter-spacing: 0.3px;
+}
+
+.privacy-policy-header {
+    margin-bottom: 2rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid #efefef;
+}
+
+.privacy-policy-eyebrow {
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    font-size: 0.75rem;
+    color: #909090;
+    margin-bottom: 0.5rem;
+}
+
+.privacy-policy-header h1 {
+    color: #2f2f2f;
+    letter-spacing: 0.8px;
+    margin-bottom: 0.75rem;
+}
+
+.privacy-policy-updated {
+    color: #6f6f6f;
+}
+
+.privacy-policy-card p {
+    margin-bottom: 1rem;
+    color: #4a4a4a;
+}
+
+.privacy-policy-section {
+    margin-top: 2rem;
+}
+
+.privacy-policy-section h2 {
+    margin-bottom: 0.9rem;
+    color: #2f2f2f;
+    letter-spacing: 0.4px;
+    font-size: 1.35rem;
+}
+
+.privacy-policy-section h3 {
+    margin-top: 1.2rem;
+    margin-bottom: 0.5rem;
+    color: #3a3a3a;
+    font-size: 1.05rem;
+    letter-spacing: 0.2px;
+}
+
+.privacy-policy-card ul {
+    margin: 0.4rem 0 1rem 1.3rem;
+    color: #4a4a4a;
+}
+
+.privacy-policy-card li {
+    margin-bottom: 0.45rem;
+}
+
+.privacy-policy-card a {
+    color: #2f2f2f;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+
 /* Mobile Styles */
 @media (max-width: 768px) {
     .portfolio-container {
@@ -429,5 +512,22 @@ nav.active {
     .menu-button {
         top: 15px;
         right: 15px;
+    }
+
+    .privacy-policy-container {
+        padding: 6.5rem 1rem 6rem;
+    }
+
+    .privacy-policy-card {
+        padding: 1.35rem;
+        border-radius: 12px;
+    }
+
+    .privacy-policy-header h1 {
+        font-size: 1.65rem;
+    }
+
+    .privacy-policy-section h2 {
+        font-size: 1.2rem;
     }
 }

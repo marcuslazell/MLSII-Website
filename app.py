@@ -164,6 +164,12 @@ def links():
     title = get_site_title()
     return render_template('links.html', title=title)
 
+@app.route('/privacy-policy')
+@app.route('/gamelife-privacy-policy')
+def privacy_policy():
+    title = get_site_title()
+    return render_template('privacy_policy.html', title=title)
+
 @app.route('/.well-known/appspecific/com.tesla.3p.public-key.pem')
 def tesla_partner_public_key():
     return send_from_directory(
