@@ -18,7 +18,7 @@
     </style>
 </head>
 
-<body>
+<body class="{% if request.endpoint %}{{ request.endpoint }}-page{% endif %}">
     {% if request.endpoint != 'index' %}
     <header class="header">
         <a href="{{ url_for('index') }}" class="site-title">{{ title }}</a>
