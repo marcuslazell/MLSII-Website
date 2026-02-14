@@ -1,5 +1,35 @@
 {% extends "base.html" %}
 {% block content %}
+<style>
+    /* Fallback safety styles so policy text is readable even if old CSS is cached */
+    .privacy-policy-container {
+        padding-top: 10rem !important;
+        padding-right: 1rem !important;
+        padding-left: 1rem !important;
+    }
+
+    .privacy-policy-card {
+        margin: 0 auto !important;
+        padding: 2.25rem 1.5rem !important;
+    }
+
+    .privacy-policy-card p,
+    .privacy-policy-card li {
+        margin-bottom: 0.95rem !important;
+        line-height: 1.72 !important;
+    }
+
+    @media (max-width: 768px) {
+        .privacy-policy-container {
+            padding-top: 7.5rem !important;
+            padding-bottom: 4.5rem !important;
+        }
+
+        .privacy-policy-card {
+            padding: 1.5rem 1.1rem !important;
+        }
+    }
+</style>
 <section class="privacy-policy-container">
     <article class="privacy-policy-card">
         <header class="privacy-policy-header">
