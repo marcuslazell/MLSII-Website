@@ -152,6 +152,27 @@ nav.active {
     fill: #333;
 }
 
+.legal-links {
+    position: fixed;
+    bottom: 5rem;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 10;
+}
+
+.legal-links a {
+    color: #777;
+    text-decoration: none;
+    font-size: 0.78rem;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    transition: color 0.3s ease;
+}
+
+.legal-links a:hover {
+    color: #333;
+}
+
 /* Home Page */
 .home-container {
     min-height: 100vh;
@@ -512,6 +533,15 @@ nav.active {
     .menu-button {
         top: 15px;
         right: 15px;
+    }
+
+    .legal-links {
+        bottom: 4.4rem;
+    }
+
+    .legal-links a {
+        font-size: 0.72rem;
+        letter-spacing: 1px;
     }
 
     .privacy-policy-container {
