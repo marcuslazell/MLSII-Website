@@ -171,7 +171,3 @@ Then redeploy.
 ## Maintenance Recommendation
 
 Keep this site “set-and-forget” by limiting external API dependencies to static/media systems only (current state does this).
-
----
-
-If you want, I can also generate a shorter public-facing `README` and keep this one as `README.dev.md` for internal maintenance.
